@@ -1,0 +1,289 @@
+<div class="space-y-6">
+
+    {{-- Notifikasi sukses --}}
+    @if (session('sukses'))
+        <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+            {{ session('sukses') }}
+        </div>
+    @endif
+
+    <div>
+        <h2 class="text-xl font-bold text-gray-800">Kasir & Billing</h2>
+        <p class="text-sm text-gray-400 mt-1">Catat pembayaran dari kunjungan pasien yang sudah selesai</p>
+    </div>
+
+    {{-- ===================== MENUNGGU PEMBAYARAN ===================== --}}
+    <div class="card p-5">
+        <h3 class="font-semibold text-gray-800 mb-4">Menunggu Pembayaran</h3>
+
+        <div class="space-y-3">
+            @forelse ($antrianBelumDibayar as $a)
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-3" wire:key="tagih-{{ $a->id }}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sky-500 font-bold text-sm w-14">{{ $a->kode_antrian }}</span>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">{{ $a->pasien->nama }}</p>
+                            <p class="text-xs text-gray-400">{{ $a->poli->nama }}</p>
+                        </div>
+                    </div>
+                    <button
+                        wire:click="bukaForm({{ $a->id }})"
+                       class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                    >
+                        Buat Tagihan
+                    </button>
+                </div>
+            @empty
+                <p class="text-sm text-gray-400 text-center py-6">Tidak ada antrian yang menunggu pembayaran saat ini.</p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- ===================== RIWAYAT TRANSAKSI ===================== --}}
+    <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h3 class="font-semibold text-gray-800">Riwayat Transaksi</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 text-left text-gray-400 text-xs uppercase tracking-wide">
+                        <th class="px-5 py-3 font-medium">Tanggal</th>
+                        <th class="px-5 py-3 font-medium">Pasien</th>
+                        <th class="px-5 py-3 font-medium">Deskripsi</th>
+                        <th class="px-5 py-3 font-medium">Metode</th>
+                        <th class="px-5 py-3 font-medium">Total</th>
+                        <th class="px-5 py-3 font-medium text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse ($riwayat as $t)
+                        <tr class="hover:bg-gray-50/60" wire:key="riwayat-{{ $t->id }}">
+                            <td class="px-5 py-3 text-gray-500 whitespace-nowrap">{{ $t->tanggal->translatedFormat('d M Y') }}</td>
+                            <td class="px-5 py-3 text-gray-700">{{ $t->pasien->nama ?? '-' }}</td>
+                            <td class="px-5 py-3 text-gray-500">{{ $t->deskripsi }}</td>
+                            <td class="px-5 py-3 text-gray-500">{{ $t->metode }}</td>
+                            <td class="px-5 py-3 text-gray-700 font-medium whitespace-nowrap">
+                                Rp {{ number_format($t->jumlah, 0, ',', '.') }}
+                            </td>
+                            <td class="px-5 py-3 text-right">
+                                <button wire:click="lihatDetail({{ $t->id }})" class="text-xs font-medium text-sky-500 hover:underline">
+                                    Lihat Rincian
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-400 text-sm">Belum ada transaksi.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($riwayat->hasPages())
+            <div class="px-5 py-4 border-t border-gray-50">
+                {{ $riwayat->links() }}
+            </div>
+        @endif
+    </div>
+
+    {{-- ===================== MODAL BUAT TAGIHAN ===================== --}}
+    @if ($showModal)
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto" wire:click.self="tutupForm">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 my-8">
+
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-bold text-gray-800">Buat Tagihan</h3>
+                    <button wire:click="tutupForm" class="text-gray-400 hover:text-gray-600">
+                        <x-icon name="cross" class="w-5 h-5 rotate-45" />
+                    </button>
+                </div>
+                <p class="text-sm text-gray-500 mb-5">{{ $namaPasien }} — {{ $namaPoli }}</p>
+
+                <form wire:submit="simpan" class="space-y-5">
+
+                    {{-- Daftar item --}}
+                    <div class="space-y-2">
+                        <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-400 px-1">
+                            <span class="col-span-5">Item</span>
+                            <span class="col-span-2 text-center">Qty</span>
+                            <span class="col-span-2 text-right">Harga</span>
+                            <span class="col-span-2 text-right">Subtotal</span>
+                            <span class="col-span-1"></span>
+                        </div>
+
+                        @foreach ($items as $index => $item)
+                            <div class="grid grid-cols-12 gap-2 items-center" wire:key="item-{{ $index }}">
+                                <div class="col-span-5">
+                                    <input
+                                        type="text"
+                                        wire:model="items.{{ $index }}.nama_item"
+                                        @if (! empty($item['obat_id'])) disabled @endif
+                                        class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm disabled:opacity-70"
+                                    >
+                                </div>
+                                <div class="col-span-2">
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        wire:model.live="items.{{ $index }}.qty"
+                                        class="w-full bg-gray-100 rounded-lg px-2 py-2 text-sm text-center"
+                                    >
+                                </div>
+                                <div class="col-span-2">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        wire:model.live="items.{{ $index }}.harga_satuan"
+                                        @if (! empty($item['obat_id'])) disabled @endif
+                                        class="w-full bg-gray-100 rounded-lg px-2 py-2 text-sm text-right disabled:opacity-70"
+                                    >
+                                </div>
+                                <div class="col-span-2 text-right text-sm text-gray-600 font-medium">
+                                    {{ number_format(((int) ($item['qty'] ?? 0)) * ((int) ($item['harga_satuan'] ?? 0)), 0, ',', '.') }}
+                                </div>
+                                <div class="col-span-1 text-right">
+                                    @if (count($items) > 1)
+                                        <button type="button" wire:click="hapusItem({{ $index }})" class="text-red-400 hover:text-red-600">
+                                            <x-icon name="cross" class="w-4 h-4 rotate-45" />
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+
+                        @error('items') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Tambah item: obat & layanan --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="relative">
+                            <label class="text-xs font-medium text-gray-500 block mb-1">+ Tambah Obat</label>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="cariObat"
+                                placeholder="Cari nama obat..."
+                                autocomplete="off"
+                                class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            >
+                            @if (strlen($cariObat) >= 2)
+                                <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    @forelse ($this->obatOptions() as $opt)
+                                        <button
+                                            type="button"
+                                            wire:click="tambahObat({{ $opt->id }})"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                                        >
+                                            <span class="text-gray-700">{{ $opt->nama }}</span>
+                                            <span class="text-xs text-gray-400">Rp {{ number_format($opt->harga, 0, ',', '.') }}</span>
+                                        </button>
+                                    @empty
+                                        <p class="px-3 py-2 text-sm text-gray-400">Obat tidak ditemukan.</p>
+                                    @endforelse
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="relative">
+                            <label class="text-xs font-medium text-gray-500 block mb-1">+ Tambah Layanan / Tindakan</label>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="cariLayanan"
+                                placeholder="Cari layanan (lab, suntik, dll)..."
+                                autocomplete="off"
+                                class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            >
+                            @if (strlen($cariLayanan) >= 2)
+                                <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    @forelse ($this->layananOptions() as $opt)
+                                        <button
+                                            type="button"
+                                            wire:click="tambahLayanan({{ $opt->id }})"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                                        >
+                                            <span class="text-gray-700">{{ $opt->nama }}</span>
+                                            <span class="text-xs text-gray-400">Rp {{ number_format($opt->harga, 0, ',', '.') }}</span>
+                                        </button>
+                                    @empty
+                                        <p class="px-3 py-2 text-sm text-gray-400">Layanan tidak ditemukan.</p>
+                                    @endforelse
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <button type="button" wire:click="tambahItemLain" class="text-xs font-medium text-sky-500 hover:underline">
+                        + Tambah item bebas lainnya
+                    </button>
+
+                    {{-- Total + metode --}}
+                    <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 block mb-1">Metode Pembayaran</label>
+                            <select wire:model="metode" class="bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                                <option value="Tunai">Tunai</option>
+                                <option value="Transfer">Transfer</option>
+                                <option value="QRIS">QRIS</option>
+                            </select>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400">Total Tagihan</p>
+                            <p class="text-xl font-bold text-gray-800">Rp {{ number_format($this->total(), 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" wire:click="tutupForm" class="text-sm font-medium text-gray-500 px-4 py-2 rounded-full hover:bg-gray-100">
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            wire:loading.attr="disabled"
+                            wire:target="simpan"
+                           class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                        >
+                            <span wire:loading.remove wire:target="simpan">Simpan & Bayar</span>
+                            <span wire:loading wire:target="simpan">Memproses...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    {{-- ===================== MODAL RINCIAN TRANSAKSI ===================== --}}
+    @if ($showDetailModal && $detailTransaksi)
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupDetail">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-bold text-gray-800">Rincian Transaksi</h3>
+                    <button wire:click="tutupDetail" class="text-gray-400 hover:text-gray-600">
+                        <x-icon name="cross" class="w-5 h-5 rotate-45" />
+                    </button>
+                </div>
+                <p class="text-sm text-gray-500 mb-5">
+                    {{ $detailTransaksi->pasien->nama ?? '-' }} — {{ $detailTransaksi->tanggal->translatedFormat('d M Y') }}
+                </p>
+
+                <div class="space-y-2 mb-4">
+                    @forelse ($detailTransaksi->items as $item)
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">{{ $item->nama_item }} <span class="text-gray-400">x{{ $item->qty }}</span></span>
+                            <span class="text-gray-700 font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                        </div>
+                    @empty
+                        <p class="text-sm text-gray-400">Transaksi ini belum punya rincian item (dicatat sebelum Step 7).</p>
+                    @endforelse
+                </div>
+
+                <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                    <span class="text-sm font-medium text-gray-500">Total ({{ $detailTransaksi->metode }})</span>
+                    <span class="text-lg font-bold text-gray-800">Rp {{ number_format($detailTransaksi->jumlah, 0, ',', '.') }}</span>
+                </div>
+            </div>
+        </div>
+    @endif
+</div>

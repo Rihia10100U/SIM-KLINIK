@@ -1,0 +1,132 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\PengaturanKlinik;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+
+#[Layout('components.layouts.app')]
+class Pengaturan extends Component
+{
+    public string $title = 'Pengaturan';
+
+    public bool $isAdmin = false;
+
+    // ===== Profil =====
+    public string $nama = '';
+    public string $email = '';
+
+    // ===== Ubah Password =====
+    public string $passwordSaatIni = '';
+    public string $passwordBaru = '';
+    public string $passwordBaruKonfirmasi = '';
+
+    // ===== Info Klinik (khusus Admin) =====
+    public string $namaKlinik = '';
+    public string $alamatKlinik = '';
+    public string $teleponKlinik = '';
+    public string $jamBuka = '';
+    public string $jamTutup = '';
+
+    public function mount(): void
+    {
+        $user = Auth::user();
+
+        $this->nama    = $user->name;
+        $this->email   = $user->email;
+        $this->isAdmin = $user->isAdmin();
+
+        if (! $this->isAdmin) {
+            return; // user non-admin tidak perlu data Info Klinik
+        }
+
+        $klinik = PengaturanKlinik::firstOrCreate(
+            ['id' => 1],
+            [
+                'nama_klinik' => 'SIM-KLINIK',
+                'alamat'      => '',
+                'telepon'     => '',
+                'jam_buka'    => '08:00',
+                'jam_tutup'   => '20:00',
+            ]
+        );
+
+        $this->namaKlinik    = $klinik->nama_klinik;
+        $this->alamatKlinik  = (string) $klinik->alamat;
+        $this->teleponKlinik = (string) $klinik->telepon;
+        $this->jamBuka       = substr((string) $klinik->jam_buka, 0, 5);
+        $this->jamTutup      = substr((string) $klinik->jam_tutup, 0, 5);
+    }
+
+    public function simpanProfil(): void
+    {
+        $user = Auth::user();
+
+        $data = $this->validate([
+            'nama'  => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+        ]);
+
+        $user->update($data);
+
+        session()->flash('sukses_profil', 'Profil berhasil diperbarui.');
+    }
+
+    public function ubahPassword(): void
+    {
+        $this->validate([
+            'passwordSaatIni'        => 'required|string',
+            'passwordBaru'           => 'required|string|min:8',
+            'passwordBaruKonfirmasi' => 'required|same:passwordBaru',
+        ], [
+            'passwordBaruKonfirmasi.same' => 'Konfirmasi password baru tidak cocok.',
+        ]);
+
+        $user = Auth::user();
+
+        if (! Hash::check($this->passwordSaatIni, $user->password)) {
+            $this->addError('passwordSaatIni', 'Password saat ini salah.');
+
+            return;
+        }
+
+        $user->update(['password' => Hash::make($this->passwordBaru)]);
+
+        $this->reset(['passwordSaatIni', 'passwordBaru', 'passwordBaruKonfirmasi']);
+
+        session()->flash('sukses_password', 'Password berhasil diubah.');
+    }
+
+    public function simpanKlinik(): void
+    {
+        // Pengecekan ganda di server, bukan cuma sembunyikan tombol di Blade
+        abort_unless(Auth::user()->isAdmin(), 403);
+
+        $data = $this->validate([
+            'namaKlinik'    => 'required|string|max:255',
+            'alamatKlinik'  => 'nullable|string|max:500',
+            'teleponKlinik' => 'nullable|string|max:30',
+            'jamBuka'       => 'required',
+            'jamTutup'      => 'required',
+        ]);
+
+        PengaturanKlinik::updateOrCreate(['id' => 1], [
+            'nama_klinik' => $data['namaKlinik'],
+            'alamat'      => $data['alamatKlinik'],
+            'telepon'     => $data['teleponKlinik'],
+            'jam_buka'    => $data['jamBuka'],
+            'jam_tutup'   => $data['jamTutup'],
+        ]);
+
+        session()->flash('sukses_klinik', 'Info klinik berhasil diperbarui.');
+    }
+
+    public function render()
+    {
+        return view('livewire.pengaturan');
+    }
+}
