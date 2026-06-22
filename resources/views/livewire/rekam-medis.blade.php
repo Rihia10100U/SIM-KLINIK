@@ -2,7 +2,7 @@
 
     {{-- Notifikasi sukses --}}
     @if (session('sukses'))
-        <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+        <div class="bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-xl px-4 py-3">
             {{ session('sukses') }}
         </div>
     @endif
@@ -11,7 +11,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h2 class="text-xl font-bold text-gray-800">Rekam Medis</h2>
-            <p class="text-sm text-gray-400 mt-1">Riwayat pemeriksaan & diagnosis pasien</p>
+            <p class="text-sm text-gray-400 mt-1">Riwayat pemeriksaan, diagnosis & resep pasien</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -21,21 +21,53 @@
                     type="text"
                     wire:model.live.debounce.400ms="cari"
                     placeholder="Cari nama pasien atau No. RM..."
-                    class="w-64 pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-full transition-all duration-300 outline-none hover:border-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+                    class="bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
                 >
             </div>
 
             <button
-                wire:click="bukaForm"
-                class="flex items-center gap-2 bg-klinik-blue text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-blue-dark transition-colors whitespace-nowrap"
+                wire:click="bukaFormManual"
+                class="flex items-center gap-2 bg-gray-100 text-gray-600 text-sm font-medium px-4 py-2 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap"
             >
-                <x-icon name="document-search" class="w-4 h-4" /> Tambah Rekam Medis
+                <x-icon name="document-search" class="w-4 h-4" /> Catat Manual
             </button>
         </div>
     </div>
 
-    {{-- ===================== TABEL REKAM MEDIS ===================== --}}
+    {{-- ===================== SEDANG DIPERIKSA ===================== --}}
+    <div class="card p-5">
+        <h3 class="font-semibold text-gray-800 mb-4">Sedang Diperiksa</h3>
+
+        <div class="space-y-3">
+            @forelse ($antrianAktif as $a)
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-3" wire:key="aktif-{{ $a->id }}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sky-500 font-bold text-sm w-14">{{ $a->kode_antrian }}</span>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">{{ $a->pasien->nama }}</p>
+                            <p class="text-xs text-gray-400">{{ $a->poli->nama }}</p>
+                        </div>
+                    </div>
+                    <button
+                        wire:click="bukaFormDariAntrian({{ $a->id }})"
+                        class="text-xs font-medium text-white bg-klinik-blue px-4 py-1.5 rounded-full hover:bg-klinik-blue-dark"
+                    >
+                        Catat Hasil Pemeriksaan
+                    </button>
+                </div>
+            @empty
+                <p class="text-sm text-gray-400 text-center py-6">
+                    Tidak ada pasien yang sedang diperiksa. Panggil antrian dulu di halaman Manajemen Antrian.
+                </p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- ===================== TABEL RIWAYAT REKAM MEDIS ===================== --}}
     <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h3 class="font-semibold text-gray-800">Riwayat Rekam Medis</h3>
+        </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -82,7 +114,7 @@
                                 @if ($cari)
                                     Tidak ada rekam medis untuk pencarian "{{ $cari }}".
                                 @else
-                                    Belum ada data rekam medis. Klik "Tambah Rekam Medis" untuk mencatat pemeriksaan baru.
+                                    Belum ada data rekam medis.
                                 @endif
                             </td>
                         </tr>
@@ -98,17 +130,14 @@
         @endif
     </div>
 
-    {{-- ===================== MODAL TAMBAH / EDIT ===================== --}}
+    {{-- ===================== MODAL CATAT / EDIT ===================== --}}
     @if ($showModal)
-        <div
-            class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto"
-            wire:click.self="tutupForm"
-        >
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 my-8">
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto" wire:click.self="tutupForm">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 my-8">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">
-                        {{ $editId ? 'Detail / Edit Rekam Medis' : 'Tambah Rekam Medis' }}
+                        {{ $antrianId ? 'Catat Hasil Pemeriksaan' : ($editId ? 'Detail / Edit Rekam Medis' : 'Catat Rekam Medis Manual') }}
                     </h3>
                     <button wire:click="tutupForm" class="text-gray-400 hover:text-gray-600">
                         <x-icon name="cross" class="w-5 h-5 rotate-45" />
@@ -117,41 +146,51 @@
 
                 <form wire:submit="simpan" class="space-y-4">
 
-                    {{-- Cari pasien --}}
-                    <div class="relative">
-                        <label class="text-xs font-medium text-gray-500">Pasien</label>
-                        <input
-                            type="text"
-                            wire:model.live.debounce.300ms="cariPasien"
-                            placeholder="Ketik nama atau No. RM..."
-                            autocomplete="off"
-                            {{ $editId ? 'disabled' : '' }}
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40 disabled:opacity-60"
-                        >
-                        @error('pasien_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    {{-- Pasien --}}
+                    @if ($antrianId)
+                        {{-- Dikunci, karena sudah ditentukan dari antrian yang dipilih --}}
+                        <div class="bg-sky-50 rounded-lg px-3 py-2 text-sm text-sky-700">
+                            Pasien: <strong>{{ $namaPasienTerpilih }}</strong>
+                        </div>
+                    @elseif ($editId)
+                        <div class="bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600">
+                            Pasien: <strong>{{ $namaPasienTerpilih }}</strong>
+                        </div>
+                    @else
+                        <div class="relative">
+                            <label class="text-xs font-medium text-gray-500">Pasien</label>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="cariPasien"
+                                placeholder="Ketik nama atau No. RM..."
+                                autocomplete="off"
+                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            >
+                            @error('pasien_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 
-                        @if (! $editId && ! $pasien_id && strlen($cariPasien) >= 2)
-                            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                @forelse ($this->pasienOptions() as $opt)
-                                    <button
-                                        type="button"
-                                        wire:click="pilihPasien({{ $opt->id }})"
-                                        class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
-                                    >
-                                        <span class="text-gray-700">{{ $opt->nama }}</span>
-                                        <span class="text-xs text-gray-400">{{ $opt->no_rm }}</span>
-                                    </button>
-                                @empty
-                                    <p class="px-3 py-2 text-sm text-gray-400">Pasien tidak ditemukan.</p>
-                                @endforelse
-                            </div>
-                        @endif
-                    </div>
+                            @if (! $pasien_id && strlen($cariPasien) >= 2)
+                                <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    @forelse ($this->pasienOptions() as $opt)
+                                        <button
+                                            type="button"
+                                            wire:click="pilihPasien({{ $opt->id }})"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                                        >
+                                            <span class="text-gray-700">{{ $opt->nama }}</span>
+                                            <span class="text-xs text-gray-400">{{ $opt->no_rm }}</span>
+                                        </button>
+                                    @empty
+                                        <p class="px-3 py-2 text-sm text-gray-400">Pasien tidak ditemukan.</p>
+                                    @endforelse
+                                </div>
+                            @endif
+                        </div>
+                    @endif
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-medium text-gray-500">Poli</label>
-                            <select wire:model="poli_id" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <select wire:model="poli_id" {{ $antrianId ? 'disabled' : '' }} class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40 disabled:opacity-70">
                                 <option value="">-</option>
                                 @foreach ($polis as $poli)
                                     <option value="{{ $poli->id }}">{{ $poli->nama }}</option>
@@ -191,6 +230,70 @@
                         <textarea wire:model="catatan" rows="2" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"></textarea>
                     </div>
 
+                    {{-- ===== RESEP (hanya saat catat dari antrian aktif) ===== --}}
+                    @if ($antrianId)
+                        <div class="border-t border-gray-100 pt-4">
+                            <label class="text-xs font-medium text-gray-500 block mb-2">Resep Obat (opsional)</label>
+
+                            @if (count($resep) > 0)
+                                <div class="space-y-2 mb-3">
+                                    @foreach ($resep as $index => $item)
+                                        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2" wire:key="resep-{{ $index }}">
+                                            <div class="flex items-center gap-3 flex-1">
+                                                <span class="text-sm text-gray-700">{{ $item['nama'] }}</span>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    wire:model.live="resep.{{ $index }}.qty"
+                                                    class="w-16 bg-white border border-gray-200 rounded px-2 py-1 text-sm text-center"
+                                                >
+                                                <span class="text-xs text-gray-400">
+                                                    Rp {{ number_format($item['harga_satuan'], 0, ',', '.') }} / item
+                                                </span>
+                                            </div>
+                                            <button type="button" wire:click="hapusResep({{ $index }})" class="text-red-400 hover:text-red-600">
+                                                <x-icon name="cross" class="w-4 h-4 rotate-45" />
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    wire:model.live.debounce.300ms="cariObat"
+                                    placeholder="Cari & tambah obat ke resep..."
+                                    autocomplete="off"
+                                    class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                                >
+                                @if (strlen($cariObat) >= 2)
+                                    <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                        @forelse ($this->obatOptions() as $opt)
+                                            <button
+                                                type="button"
+                                                wire:click="tambahObat({{ $opt->id }})"
+                                                class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                                            >
+                                                <span class="text-gray-700">{{ $opt->nama }}</span>
+                                                <span class="text-xs text-gray-400">Rp {{ number_format($opt->harga, 0, ',', '.') }}</span>
+                                            </button>
+                                        @empty
+                                            <p class="px-3 py-2 text-sm text-gray-400">Obat tidak ditemukan.</p>
+                                        @endforelse
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if (count($resep) > 0)
+                                <p class="text-xs text-gray-400 mt-2">
+                                    Total resep: <strong>Rp {{ number_format($this->totalResep(), 0, ',', '.') }}</strong>
+                                    — akan dikirim ke Apoteker untuk pembayaran setelah disimpan.
+                                </p>
+                            @endif
+                        </div>
+                    @endif
+
                     <div class="flex items-center justify-end gap-3 pt-2">
                         <button type="button" wire:click="tutupForm" class="text-sm font-medium text-gray-500 px-4 py-2 rounded-full hover:bg-gray-100">
                             Batal
@@ -201,7 +304,9 @@
                             wire:target="simpan"
                             class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
                         >
-                            <span wire:loading.remove wire:target="simpan">Simpan</span>
+                            <span wire:loading.remove wire:target="simpan">
+                                {{ $antrianId ? 'Simpan & Selesaikan Pemeriksaan' : 'Simpan' }}
+                            </span>
                             <span wire:loading wire:target="simpan">Menyimpan...</span>
                         </button>
                     </div>

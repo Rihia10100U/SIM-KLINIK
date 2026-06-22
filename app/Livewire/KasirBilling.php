@@ -2,8 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Antrian;
-use App\Models\Layanan;
 use App\Models\Obat;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
@@ -12,68 +10,56 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Title;
 
 #[Layout('components.layouts.app')]
 class KasirBilling extends Component
 {
     use WithPagination;
 
-    #[Title('Kasir & Billing')] 
-    public string $title = 'Kasir & Billing';
+    public string $title = 'Farmasi & Pembayaran';
 
-    // ===== Modal "Buat Tagihan" =====
+    // ===== Modal konfirmasi pembayaran resep =====
     public bool $showModal = false;
-    public ?int $antrianId = null;
+    public ?int $transaksiId = null;
     public string $namaPasien = '';
-    public string $namaPoli = '';
-    public string $metode = 'Tunai';
     public array $items = [];
+    public string $metode = 'Tunai';
     public string $cariObat = '';
-    public string $cariLayanan = '';
 
-    // ===== Modal "Rincian Transaksi" =====
+    // ===== Modal rincian riwayat =====
     public bool $showDetailModal = false;
     public ?int $detailId = null;
 
     protected function rules(): array
     {
         return [
-            'metode'                => 'required|string',
-            'items'                 => 'required|array|min:1',
-            'items.*.nama_item'     => 'required|string|max:255',
-            'items.*.qty'           => 'required|integer|min:1',
-            'items.*.harga_satuan'  => 'required|integer|min:0',
+            'metode'               => 'required|string',
+            'items'                => 'required|array|min:1',
+            'items.*.nama_item'    => 'required|string|max:255',
+            'items.*.qty'          => 'required|integer|min:1',
+            'items.*.harga_satuan' => 'required|integer|min:0',
         ];
     }
 
-    public function bukaForm(int $antrianId): void
+    /**
+     * Buka modal konfirmasi pembayaran untuk 1 resep (transaksi berstatus menunggu_pembayaran).
+     */
+    public function bukaForm(int $transaksiId): void
     {
-        $antrian = Antrian::with(['pasien', 'poli'])->findOrFail($antrianId);
+        $transaksi = Transaksi::with(['pasien', 'items'])->findOrFail($transaksiId);
 
-        $this->antrianId   = $antrian->id;
-        $this->namaPasien  = $antrian->pasien->nama;
-        $this->namaPoli    = $antrian->poli->nama;
-        $this->metode      = 'Tunai';
-        $this->cariObat    = '';
-        $this->cariLayanan = '';
+        $this->transaksiId = $transaksi->id;
+        $this->namaPasien   = $transaksi->pasien->nama ?? '-';
+        $this->metode        = 'Tunai';
+        $this->cariObat       = '';
 
-        // Cari harga konsultasi default dari Data Layanan untuk poli ini.
-        // Kalau belum diatur di Data Layanan, jatuh ke nilai default Rp50.000.
-        $layananKonsultasi = Layanan::where('poli_id', $antrian->poli_id)
-            ->where('kategori', 'konsultasi')
-            ->where('aktif', true)
-            ->first();
-
-        $this->items = [
-            [
-                'nama_item'    => $layananKonsultasi->nama ?? ('Biaya Konsultasi ' . $antrian->poli->nama),
-                'jenis'        => 'konsultasi',
-                'obat_id'      => null,
-                'qty'          => 1,
-                'harga_satuan' => $layananKonsultasi->harga ?? 50000,
-            ],
-        ];
+        $this->items = $transaksi->items->map(fn (TransaksiItem $i) => [
+            'obat_id'      => $i->obat_id,
+            'nama_item'    => $i->nama_item,
+            'jenis'        => $i->jenis,
+            'qty'          => $i->qty,
+            'harga_satuan' => $i->harga_satuan,
+        ])->toArray();
 
         $this->resetErrorBag();
         $this->showModal = true;
@@ -82,12 +68,9 @@ class KasirBilling extends Component
     public function tutupForm(): void
     {
         $this->showModal = false;
-        $this->reset(['antrianId', 'namaPasien', 'namaPoli', 'items', 'cariObat', 'cariLayanan']);
+        $this->reset(['transaksiId', 'namaPasien', 'items', 'cariObat']);
     }
 
-    /**
-     * Hasil pencarian obat untuk ditambahkan sebagai item tagihan.
-     */
     public function obatOptions(): Collection
     {
         if (strlen($this->cariObat) < 2) {
@@ -97,29 +80,14 @@ class KasirBilling extends Component
         return Obat::where('nama', 'like', "%{$this->cariObat}%")->limit(8)->get();
     }
 
-    /**
-     * Hasil pencarian layanan (tindakan/lainnya) untuk ditambahkan sebagai item tagihan.
-     */
-    public function layananOptions(): Collection
-    {
-        if (strlen($this->cariLayanan) < 2) {
-            return new Collection();
-        }
-
-        return Layanan::where('aktif', true)
-            ->where('nama', 'like', "%{$this->cariLayanan}%")
-            ->limit(8)
-            ->get();
-    }
-
     public function tambahObat(int $obatId): void
     {
         $obat = Obat::findOrFail($obatId);
 
         $this->items[] = [
+            'obat_id'      => $obat->id,
             'nama_item'    => $obat->nama,
             'jenis'        => 'obat',
-            'obat_id'      => $obat->id,
             'qty'          => 1,
             'harga_satuan' => $obat->harga,
         ];
@@ -127,45 +95,16 @@ class KasirBilling extends Component
         $this->cariObat = '';
     }
 
-    public function tambahLayanan(int $layananId): void
-    {
-        $layanan = Layanan::findOrFail($layananId);
-
-        $this->items[] = [
-            'nama_item'    => $layanan->nama,
-            'jenis'        => $layanan->kategori === 'konsultasi' ? 'konsultasi' : 'tindakan',
-            'obat_id'      => null,
-            'qty'          => 1,
-            'harga_satuan' => $layanan->harga,
-        ];
-
-        $this->cariLayanan = '';
-    }
-
-    public function tambahItemLain(): void
-    {
-        $this->items[] = [
-            'nama_item'    => '',
-            'jenis'        => 'lainnya',
-            'obat_id'      => null,
-            'qty'          => 1,
-            'harga_satuan' => 0,
-        ];
-    }
-
     public function hapusItem(int $index): void
     {
         if (count($this->items) <= 1) {
-            return; // minimal harus ada 1 item
+            return;
         }
 
         unset($this->items[$index]);
         $this->items = array_values($this->items);
     }
 
-    /**
-     * Total tagihan saat ini (dipanggil langsung dari Blade: $this->total()).
-     */
     public function total(): int
     {
         return collect($this->items)->sum(
@@ -173,22 +112,26 @@ class KasirBilling extends Component
         );
     }
 
-    public function simpan(): void
+    /**
+     * Konfirmasi pembayaran: simpan item final, set status lunas, DAN kurangi stok obat di sini
+     * (bukan saat resep dibuat) — supaya stok baru berkurang saat obat benar-benar diserahkan/dibayar.
+     */
+    public function konfirmasiPembayaran(): void
     {
         $data  = $this->validate();
         $total = $this->total();
 
         DB::transaction(function () use ($data, $total) {
-            $antrian = Antrian::findOrFail($this->antrianId);
+            $transaksi = Transaksi::findOrFail($this->transaksiId);
 
-            $transaksi = Transaksi::create([
-                'pasien_id'  => $antrian->pasien_id,
-                'antrian_id' => $antrian->id,
-                'deskripsi'  => 'Pembayaran kunjungan ' . $antrian->poli->nama,
-                'jumlah'     => $total,
-                'metode'     => $data['metode'],
-                'tanggal'    => today(),
+            $transaksi->update([
+                'jumlah' => $total,
+                'metode' => $data['metode'],
+                'status' => 'lunas',
             ]);
+
+            // Ganti seluruh item lama dengan item final hasil konfirmasi apoteker
+            $transaksi->items()->delete();
 
             foreach ($this->items as $item) {
                 $qty   = (int) $item['qty'];
@@ -198,13 +141,12 @@ class KasirBilling extends Component
                     'transaksi_id' => $transaksi->id,
                     'obat_id'      => $item['obat_id'] ?? null,
                     'nama_item'    => $item['nama_item'],
-                    'jenis'        => $item['jenis'] ?? 'lainnya',
+                    'jenis'        => $item['jenis'] ?? 'obat',
                     'qty'          => $qty,
                     'harga_satuan' => $harga,
                     'subtotal'     => $qty * $harga,
                 ]);
 
-                // Kurangi stok otomatis kalau item ini adalah obat
                 if (! empty($item['obat_id'])) {
                     $obat = Obat::find($item['obat_id']);
                     if ($obat) {
@@ -215,7 +157,7 @@ class KasirBilling extends Component
             }
         });
 
-        session()->flash('sukses', 'Pembayaran berhasil dicatat.');
+        session()->flash('sukses', 'Pembayaran berhasil dikonfirmasi, stok obat sudah diperbarui.');
         $this->tutupForm();
     }
 
@@ -233,14 +175,13 @@ class KasirBilling extends Component
 
     public function render()
     {
-        $antrianBelumDibayar = Antrian::with(['pasien', 'poli'])
-            ->whereDate('tanggal', today())
-            ->where('status', 'selesai')
-            ->whereDoesntHave('transaksi')
-            ->orderBy('updated_at')
+        $resepMenunggu = Transaksi::with('pasien')
+            ->where('status', 'menunggu_pembayaran')
+            ->orderBy('created_at')
             ->get();
 
         $riwayat = Transaksi::with('pasien')
+            ->where('status', 'lunas')
             ->latest('created_at')
             ->paginate(10);
 
@@ -249,9 +190,9 @@ class KasirBilling extends Component
             : null;
 
         return view('livewire.kasir-billing', [
-            'antrianBelumDibayar' => $antrianBelumDibayar,
-            'riwayat'             => $riwayat,
-            'detailTransaksi'     => $detailTransaksi,
+            'resepMenunggu'   => $resepMenunggu,
+            'riwayat'         => $riwayat,
+            'detailTransaksi' => $detailTransaksi,
         ]);
     }
 }

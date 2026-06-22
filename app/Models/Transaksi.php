@@ -12,7 +12,13 @@ class Transaksi extends Model
     use HasFactory;
 
     protected $fillable = [
-        'pasien_id', 'antrian_id', 'deskripsi', 'jumlah', 'metode', 'tanggal',
+        'pasien_id',
+        'antrian_id',
+        'deskripsi',
+        'jumlah',
+        'metode',
+        'status',       // ← ini yang kurang, penyebab resep selalu tersimpan sebagai 'lunas'
+        'tanggal',
     ];
 
     protected $casts = [

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Antrian;
+use App\Models\AntrianPendaftaran;
 use App\Models\Poli;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -14,23 +15,35 @@ class KioskTunggu extends Component
 
     public function render()
     {
-        $sedangDipanggil = Antrian::with('poli')
+        $pendaftaranDipanggil = AntrianPendaftaran::whereDate('tanggal', today())
+            ->where('status', 'dipanggil')
+            ->orderByDesc('updated_at')
+            ->limit(4)
+            ->get();
+
+        $poliDipanggil = Antrian::with('poli')
             ->whereDate('tanggal', today())
             ->where('status', 'dipanggil')
             ->orderByDesc('updated_at')
             ->limit(6)
             ->get();
 
-        $menunggu = Poli::where('aktif', true)
+        $menungguPerPoli = Poli::where('aktif', true)
             ->withCount(['antrians' => fn ($q) => $q
                 ->whereDate('tanggal', today())
                 ->where('status', 'menunggu')])
             ->orderBy('kode')
             ->get();
 
+        $pendaftaranMenunggu = AntrianPendaftaran::whereDate('tanggal', today())
+            ->where('status', 'menunggu')
+            ->count();
+
         return view('livewire.kiosk-tunggu', [
-            'sedangDipanggil' => $sedangDipanggil,
-            'menunggu'        => $menunggu,
+            'pendaftaranDipanggil' => $pendaftaranDipanggil,
+            'poliDipanggil'        => $poliDipanggil,
+            'menungguPerPoli'      => $menungguPerPoli,
+            'pendaftaranMenunggu'  => $pendaftaranMenunggu,
         ]);
     }
 }

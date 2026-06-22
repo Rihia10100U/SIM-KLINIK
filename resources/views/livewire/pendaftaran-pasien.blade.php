@@ -21,13 +21,13 @@
                     type="text"
                     wire:model.live.debounce.400ms="cari"
                     placeholder="Cari nama, No. RM, No. HP..."
-                    class="w-64 pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-full transition-all duration-300 outline-none hover:border-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+                    class="bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
                 >
             </div>
 
             <button
                 wire:click="bukaForm"
-                class="flex items-center gap-2 bg-klinik-blue text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-blue-dark transition-colors whitespace-nowrap"
+                class="flex items-center gap-2 bg-klinik-green text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-green-dark transition-colors whitespace-nowrap"
             >
                 <x-icon name="user-plus" class="w-4 h-4" /> Tambah Pasien
             </button>
@@ -100,10 +100,10 @@
     {{-- ===================== MODAL TAMBAH / EDIT ===================== --}}
     @if ($showModal)
         <div
-            class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+            class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto"
             wire:click.self="tutupForm"
         >
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 my-8">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">
@@ -178,6 +178,26 @@
                         ></textarea>
                     </div>
 
+                    {{-- Poli tujuan: cuma muncul saat menambah pasien BARU --}}
+                    @if (! $editId)
+                        <div class="border-t border-gray-100 pt-4">
+                            <label class="text-xs font-medium text-gray-500">Poli Tujuan</label>
+                            <select
+                                wire:model="poli_id"
+                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            >
+                                <option value="">Pilih poli</option>
+                                @foreach ($polis as $poli)
+                                    <option value="{{ $poli->id }}">{{ $poli->nama }}</option>
+                                @endforeach
+                            </select>
+                            @error('poli_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                            <p class="text-xs text-gray-400 mt-1">
+                                Pasien akan langsung diberi nomor antrian ke poli ini dan tiketnya dicetak setelah disimpan.
+                            </p>
+                        </div>
+                    @endif
+
                     <div class="flex items-center justify-end gap-3 pt-2">
                         <button
                             type="button"
@@ -190,9 +210,11 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="simpan"
-                            class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                            class="text-sm font-medium text-white bg-klinik-green px-5 py-2 rounded-full hover:bg-klinik-green-dark disabled:opacity-60"
                         >
-                            <span wire:loading.remove wire:target="simpan">Simpan</span>
+                            <span wire:loading.remove wire:target="simpan">
+                                {{ $editId ? 'Simpan' : 'Simpan & Cetak Antrian' }}
+                            </span>
                             <span wire:loading wire:target="simpan">Menyimpan...</span>
                         </button>
                     </div>

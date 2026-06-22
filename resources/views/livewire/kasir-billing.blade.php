@@ -8,33 +8,30 @@
     @endif
 
     <div>
-        <h2 class="text-xl font-bold text-gray-800">Kasir & Billing</h2>
-        <p class="text-sm text-gray-400 mt-1">Catat pembayaran dari kunjungan pasien yang sudah selesai</p>
+        <h2 class="text-xl font-bold text-gray-800">Farmasi & Pembayaran</h2>
+        <p class="text-sm text-gray-400 mt-1">Konfirmasi pembayaran resep dari Rekam Medis</p>
     </div>
 
-    {{-- ===================== MENUNGGU PEMBAYARAN ===================== --}}
+    {{-- ===================== RESEP MENUNGGU PEMBAYARAN ===================== --}}
     <div class="card p-5">
-        <h3 class="font-semibold text-gray-800 mb-4">Menunggu Pembayaran</h3>
+        <h3 class="font-semibold text-gray-800 mb-4">Resep Menunggu Pembayaran</h3>
 
         <div class="space-y-3">
-            @forelse ($antrianBelumDibayar as $a)
-                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-3" wire:key="tagih-{{ $a->id }}">
-                    <div class="flex items-center gap-3">
-                        <span class="text-sky-500 font-bold text-sm w-14">{{ $a->kode_antrian }}</span>
-                        <div>
-                            <p class="text-sm font-medium text-gray-700">{{ $a->pasien->nama }}</p>
-                            <p class="text-xs text-gray-400">{{ $a->poli->nama }}</p>
-                        </div>
+            @forelse ($resepMenunggu as $t)
+                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-3" wire:key="resep-{{ $t->id }}">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">{{ $t->pasien->nama ?? '-' }}</p>
+                        <p class="text-xs text-gray-400">{{ $t->deskripsi }}</p>
                     </div>
                     <button
-                        wire:click="bukaForm({{ $a->id }})"
-                       class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                        wire:click="bukaForm({{ $t->id }})"
+                        class="text-xs font-medium text-white bg-klinik-green px-4 py-1.5 rounded-full hover:bg-klinik-green-dark"
                     >
-                        Buat Tagihan
+                        Proses Pembayaran
                     </button>
                 </div>
             @empty
-                <p class="text-sm text-gray-400 text-center py-6">Tidak ada antrian yang menunggu pembayaran saat ini.</p>
+                <p class="text-sm text-gray-400 text-center py-6">Tidak ada resep yang menunggu pembayaran saat ini.</p>
             @endforelse
         </div>
     </div>
@@ -42,7 +39,7 @@
     {{-- ===================== RIWAYAT TRANSAKSI ===================== --}}
     <div class="card overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-50">
-            <h3 class="font-semibold text-gray-800">Riwayat Transaksi</h3>
+            <h3 class="font-semibold text-gray-800">Riwayat Pembayaran</h3>
         </div>
 
         <div class="overflow-x-auto">
@@ -75,7 +72,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-gray-400 text-sm">Belum ada transaksi.</td>
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-400 text-sm">Belum ada transaksi yang lunas.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -89,22 +86,22 @@
         @endif
     </div>
 
-    {{-- ===================== MODAL BUAT TAGIHAN ===================== --}}
+    {{-- ===================== MODAL KONFIRMASI PEMBAYARAN ===================== --}}
     @if ($showModal)
         <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto" wire:click.self="tutupForm">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 my-8">
 
                 <div class="flex items-center justify-between mb-1">
-                    <h3 class="font-bold text-gray-800">Buat Tagihan</h3>
+                    <h3 class="font-bold text-gray-800">Konfirmasi Pembayaran</h3>
                     <button wire:click="tutupForm" class="text-gray-400 hover:text-gray-600">
                         <x-icon name="cross" class="w-5 h-5 rotate-45" />
                     </button>
                 </div>
-                <p class="text-sm text-gray-500 mb-5">{{ $namaPasien }} — {{ $namaPoli }}</p>
+                <p class="text-sm text-gray-500 mb-5">{{ $namaPasien }}</p>
 
-                <form wire:submit="simpan" class="space-y-5">
+                <form wire:submit="konfirmasiPembayaran" class="space-y-5">
 
-                    {{-- Daftar item --}}
+                    {{-- Daftar item resep --}}
                     <div class="space-y-2">
                         <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-400 px-1">
                             <span class="col-span-5">Item</span>
@@ -157,66 +154,33 @@
                         @error('items') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
 
-                    {{-- Tambah item: obat & layanan --}}
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="relative">
-                            <label class="text-xs font-medium text-gray-500 block mb-1">+ Tambah Obat</label>
-                            <input
-                                type="text"
-                                wire:model.live.debounce.300ms="cariObat"
-                                placeholder="Cari nama obat..."
-                                autocomplete="off"
-                                class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
-                            >
-                            @if (strlen($cariObat) >= 2)
-                                <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                    @forelse ($this->obatOptions() as $opt)
-                                        <button
-                                            type="button"
-                                            wire:click="tambahObat({{ $opt->id }})"
-                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
-                                        >
-                                            <span class="text-gray-700">{{ $opt->nama }}</span>
-                                            <span class="text-xs text-gray-400">Rp {{ number_format($opt->harga, 0, ',', '.') }}</span>
-                                        </button>
-                                    @empty
-                                        <p class="px-3 py-2 text-sm text-gray-400">Obat tidak ditemukan.</p>
-                                    @endforelse
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="relative">
-                            <label class="text-xs font-medium text-gray-500 block mb-1">+ Tambah Layanan / Tindakan</label>
-                            <input
-                                type="text"
-                                wire:model.live.debounce.300ms="cariLayanan"
-                                placeholder="Cari layanan (lab, suntik, dll)..."
-                                autocomplete="off"
-                                class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
-                            >
-                            @if (strlen($cariLayanan) >= 2)
-                                <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                    @forelse ($this->layananOptions() as $opt)
-                                        <button
-                                            type="button"
-                                            wire:click="tambahLayanan({{ $opt->id }})"
-                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
-                                        >
-                                            <span class="text-gray-700">{{ $opt->nama }}</span>
-                                            <span class="text-xs text-gray-400">Rp {{ number_format($opt->harga, 0, ',', '.') }}</span>
-                                        </button>
-                                    @empty
-                                        <p class="px-3 py-2 text-sm text-gray-400">Layanan tidak ditemukan.</p>
-                                    @endforelse
-                                </div>
-                            @endif
-                        </div>
+                    {{-- Tambah obat tambahan --}}
+                    <div class="relative">
+                        <label class="text-xs font-medium text-gray-500 block mb-1">+ Tambah Obat Lain (kalau diperlukan)</label>
+                        <input
+                            type="text"
+                            wire:model.live.debounce.300ms="cariObat"
+                            placeholder="Cari nama obat..."
+                            autocomplete="off"
+                            class="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                        >
+                        @if (strlen($cariObat) >= 2)
+                            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                @forelse ($this->obatOptions() as $opt)
+                                    <button
+                                        type="button"
+                                        wire:click="tambahObat({{ $opt->id }})"
+                                        class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                                    >
+                                        <span class="text-gray-700">{{ $opt->nama }}</span>
+                                        <span class="text-xs text-gray-400">Rp {{ number_format($opt->harga, 0, ',', '.') }}</span>
+                                    </button>
+                                @empty
+                                    <p class="px-3 py-2 text-sm text-gray-400">Obat tidak ditemukan.</p>
+                                @endforelse
+                            </div>
+                        @endif
                     </div>
-
-                    <button type="button" wire:click="tambahItemLain" class="text-xs font-medium text-sky-500 hover:underline">
-                        + Tambah item bebas lainnya
-                    </button>
 
                     {{-- Total + metode --}}
                     <div class="flex items-center justify-between border-t border-gray-100 pt-4">
@@ -229,7 +193,7 @@
                             </select>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs text-gray-400">Total Tagihan</p>
+                            <p class="text-xs text-gray-400">Total Bayar</p>
                             <p class="text-xl font-bold text-gray-800">Rp {{ number_format($this->total(), 0, ',', '.') }}</p>
                         </div>
                     </div>
@@ -241,11 +205,11 @@
                         <button
                             type="submit"
                             wire:loading.attr="disabled"
-                            wire:target="simpan"
-                           class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                            wire:target="konfirmasiPembayaran"
+                            class="text-sm font-medium text-white bg-klinik-green px-5 py-2 rounded-full hover:bg-klinik-green-dark disabled:opacity-60"
                         >
-                            <span wire:loading.remove wire:target="simpan">Simpan & Bayar</span>
-                            <span wire:loading wire:target="simpan">Memproses...</span>
+                            <span wire:loading.remove wire:target="konfirmasiPembayaran">Konfirmasi & Bayar</span>
+                            <span wire:loading wire:target="konfirmasiPembayaran">Memproses...</span>
                         </button>
                     </div>
                 </form>
@@ -253,7 +217,7 @@
         </div>
     @endif
 
-    {{-- ===================== MODAL RINCIAN TRANSAKSI ===================== --}}
+    {{-- ===================== MODAL RINCIAN RIWAYAT ===================== --}}
     @if ($showDetailModal && $detailTransaksi)
         <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupDetail">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
@@ -275,7 +239,7 @@
                             <span class="text-gray-700 font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
                         </div>
                     @empty
-                        <p class="text-sm text-gray-400">Transaksi ini belum punya rincian item (dicatat sebelum Step 7).</p>
+                        <p class="text-sm text-gray-400">Transaksi ini belum punya rincian item.</p>
                     @endforelse
                 </div>
 

@@ -26,21 +26,26 @@
 
         <nav class="flex-1 overflow-y-auto px-4 pb-6 space-y-6">
 
-            {{-- Menu utama: Dashboard & Kiosk selalu tampil untuk semua role yang login --}}
+            {{-- Menu utama --}}
             <div class="space-y-1">
                 <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <x-icon name="home" /> Dashboard
                 </a>
-                <a href="{{ route('kiosk.tunggu') }}" target="_blank" class="nav-link">
-                    <x-icon name="ticket" /> Kiosk Ruang Tunggu
-                </a>
+
+                {{-- Kiosk dibagi jadi 3: ambil nomor, papan registrasi, papan poli --}}
                 <a href="{{ route('kiosk.antrian') }}" target="_blank" class="nav-link">
-                    <x-icon name="queue" /> Kiosk Ruang Antrian
+                    <x-icon name="queue" /> Kiosk Ambil Nomor
+                </a>
+                <a href="{{ route('kiosk.tunggu.registrasi') }}" target="_blank" class="nav-link">
+                    <x-icon name="ticket" /> Papan Antrian Registrasi
+                </a>
+                <a href="{{ route('kiosk.tunggu.poli') }}" target="_blank" class="nav-link">
+                    <x-icon name="users" /> Papan Antrian Poli
                 </a>
             </div>
 
-            {{-- Grup ADMINISTRASI: tampil kalau user punya akses ke minimal 1 menu di grup ini --}}
-            @if (auth()->user()->hasRole('admin', 'resepsionis', 'dokter'))
+            {{-- Grup ADMINISTRASI --}}
+            @if (auth()->user()->hasRole('admin', 'resepsionis', 'dokter', 'petugas_rekam_medis'))
                 <div>
                     <div class="flex items-center justify-between px-4 mb-2">
                         <p class="text-xs font-semibold text-gray-400 tracking-wide">ADMINISTRASI</p>
@@ -48,18 +53,24 @@
                     </div>
                     <div class="space-y-1">
                         @if (auth()->user()->hasRole('admin', 'resepsionis'))
+                            <a href="{{ route('panggilan-pendaftaran') }}" class="nav-link {{ request()->routeIs('panggilan-pendaftaran') ? 'active' : '' }}">
+                                <x-icon name="ticket" /> Panggilan Pendaftaran
+                            </a>
+                            <a href="{{ route('cetak-antrian') }}" class="nav-link {{ request()->routeIs('cetak-antrian') ? 'active' : '' }}">
+                                <x-icon name="printer" /> Cetak Antrian
+                            </a>
                             <a href="{{ route('pendaftaran-pasien') }}" class="nav-link {{ request()->routeIs('pendaftaran-pasien') ? 'active' : '' }}">
                                 <x-icon name="user-plus" /> Pendaftaran Pasien
                             </a>
                         @endif
 
-                        @if (auth()->user()->hasRole('admin', 'resepsionis', 'dokter'))
+                        @if (auth()->user()->hasRole('admin', 'resepsionis', 'dokter', 'petugas_rekam_medis'))
                             <a href="{{ route('manajemen-antrian') }}" class="nav-link {{ request()->routeIs('manajemen-antrian') ? 'active' : '' }}">
                                 <x-icon name="clipboard" /> Manajemen Antrian
                             </a>
                         @endif
 
-                        @if (auth()->user()->hasRole('admin', 'dokter'))
+                        @if (auth()->user()->hasRole('admin', 'dokter', 'petugas_rekam_medis'))
                             <a href="{{ route('rekam-medis') }}" class="nav-link {{ request()->routeIs('rekam-medis') ? 'active' : '' }}">
                                 <x-icon name="document-search" /> Rekam Medis
                             </a>
@@ -68,30 +79,25 @@
                 </div>
             @endif
 
-            {{-- Grup OPERASIONAL: tampil kalau user punya akses ke minimal 1 menu di grup ini --}}
-            @if (auth()->user()->hasRole('admin', 'apoteker', 'kasir'))
+            {{-- Grup OPERASIONAL --}}
+            @if (auth()->user()->hasRole('admin', 'apoteker'))
                 <div>
                     <div class="flex items-center justify-between px-4 mb-2">
                         <p class="text-xs font-semibold text-gray-400 tracking-wide">OPERASIONAL</p>
                         <x-icon name="chevron-up" class="w-3.5 h-3.5 text-gray-300" />
                     </div>
                     <div class="space-y-1">
-                        @if (auth()->user()->hasRole('admin', 'apoteker'))
-                            <a href="{{ route('farmasi') }}" class="nav-link {{ request()->routeIs('farmasi') ? 'active' : '' }}">
-                                <x-icon name="pill" /> Farmasi
-                            </a>
-                        @endif
-
-                        @if (auth()->user()->hasRole('admin', 'kasir'))
-                            <a href="{{ route('kasir-billing') }}" class="nav-link {{ request()->routeIs('kasir-billing') ? 'active' : '' }}">
-                                <x-icon name="credit-card" /> Kasir & Billing
-                            </a>
-                        @endif
+                        <a href="{{ route('farmasi') }}" class="nav-link {{ request()->routeIs('farmasi') ? 'active' : '' }}">
+                            <x-icon name="pill" /> Farmasi
+                        </a>
+                        <a href="{{ route('kasir-billing') }}" class="nav-link {{ request()->routeIs('kasir-billing') ? 'active' : '' }}">
+                            <x-icon name="credit-card" /> Farmasi & Pembayaran
+                        </a>
                     </div>
                 </div>
             @endif
 
-            {{-- Grup PENGATURAN: Pengaturan selalu tampil untuk semua role, sisanya khusus Admin --}}
+            {{-- Grup PENGATURAN --}}
             <div>
                 <div class="flex items-center justify-between px-4 mb-2">
                     <p class="text-xs font-semibold text-gray-400 tracking-wide">PENGATURAN</p>

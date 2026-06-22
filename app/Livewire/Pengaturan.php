@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\PengaturanKlinik;
+use App\Services\ThermalPrinter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -32,6 +33,9 @@ class Pengaturan extends Component
     public string $jamBuka = '';
     public string $jamTutup = '';
 
+    // ===== Printer Thermal (khusus Admin) =====
+    public string $koneksiPrinter = 'none';
+
     public function mount(): void
     {
         $user = Auth::user();
@@ -41,7 +45,7 @@ class Pengaturan extends Component
         $this->isAdmin = $user->isAdmin();
 
         if (! $this->isAdmin) {
-            return; // user non-admin tidak perlu data Info Klinik
+            return; // user non-admin tidak perlu data Info Klinik & Printer
         }
 
         $klinik = PengaturanKlinik::firstOrCreate(
@@ -60,6 +64,8 @@ class Pengaturan extends Component
         $this->teleponKlinik = (string) $klinik->telepon;
         $this->jamBuka       = substr((string) $klinik->jam_buka, 0, 5);
         $this->jamTutup      = substr((string) $klinik->jam_tutup, 0, 5);
+
+        $this->koneksiPrinter = config('printer.connection');
     }
 
     public function simpanProfil(): void
@@ -103,7 +109,6 @@ class Pengaturan extends Component
 
     public function simpanKlinik(): void
     {
-        // Pengecekan ganda di server, bukan cuma sembunyikan tombol di Blade
         abort_unless(Auth::user()->isAdmin(), 403);
 
         $data = $this->validate([
@@ -123,6 +128,25 @@ class Pengaturan extends Component
         ]);
 
         session()->flash('sukses_klinik', 'Info klinik berhasil diperbarui.');
+    }
+
+    public function tesCetak(): void
+    {
+        abort_unless(Auth::user()->isAdmin(), 403);
+
+        if ($this->koneksiPrinter === 'none') {
+            session()->flash('gagal_printer', 'Koneksi printer masih "none" — atur dulu PRINTER_CONNECTION di file .env.');
+
+            return;
+        }
+
+        $berhasil = app(ThermalPrinter::class)->tesCetak($this->namaKlinik ?: 'SIM-KLINIK');
+
+        if ($berhasil) {
+            session()->flash('sukses_printer', 'Tes cetak berhasil dikirim ke printer.');
+        } else {
+            session()->flash('gagal_printer', 'Gagal mencetak — cek apakah printer menyala dan pengaturan koneksi di .env sudah benar.');
+        }
     }
 
     public function render()

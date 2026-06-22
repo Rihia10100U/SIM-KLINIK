@@ -34,7 +34,7 @@
             </div>
 
             <p class="text-xs text-gray-400">
-                Role hanya bisa diubah oleh Admin lewat Tinker/database — lihat README Step 13 untuk caranya.
+                Role hanya bisa diubah Admin lewat menu Manajemen User.
             </p>
 
             <div class="flex justify-end">
@@ -96,8 +96,8 @@
         </form>
     </div>
 
-    {{-- ===================== INFO KLINIK (KHUSUS ADMIN) ===================== --}}
     @if ($isAdmin)
+        {{-- ===================== INFO KLINIK ===================== --}}
         <div class="card p-6">
             <h3 class="font-semibold text-gray-800 mb-1">Info Klinik</h3>
             <p class="text-sm text-gray-400 mb-5">Informasi umum klinik — hanya bisa diubah oleh Admin</p>
@@ -149,6 +149,41 @@
                     </button>
                 </div>
             </form>
+        </div>
+
+        {{-- ===================== PRINTER THERMAL ===================== --}}
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="font-semibold text-gray-800">Printer Thermal</h3>
+                <span class="badge {{ $koneksiPrinter === 'none' ? 'bg-gray-100 text-gray-500' : 'bg-green-100 text-green-600' }}">
+                    {{ $koneksiPrinter === 'none' ? 'Belum Aktif' : strtoupper($koneksiPrinter) }}
+                </span>
+            </div>
+            <p class="text-sm text-gray-400 mb-5">
+                Dipakai untuk mencetak nomor antrian otomatis di Kiosk Ruang Antrian.
+                Diatur lewat file <code class="bg-gray-100 px-1 rounded">.env</code> (variabel <code class="bg-gray-100 px-1 rounded">PRINTER_CONNECTION</code>), bukan dari sini.
+            </p>
+
+            @if (session('sukses_printer'))
+                <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
+                    {{ session('sukses_printer') }}
+                </div>
+            @endif
+            @if (session('gagal_printer'))
+                <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
+                    {{ session('gagal_printer') }}
+                </div>
+            @endif
+
+            <button
+                wire:click="tesCetak"
+                wire:loading.attr="disabled"
+                wire:target="tesCetak"
+                class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:opacity-90 disabled:opacity-60"
+            >
+                <span wire:loading.remove wire:target="tesCetak">Tes Cetak</span>
+                <span wire:loading wire:target="tesCetak">Mencetak...</span>
+            </button>
         </div>
     @endif
 </div>

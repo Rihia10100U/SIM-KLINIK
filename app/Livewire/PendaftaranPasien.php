@@ -2,19 +2,21 @@
 
 namespace App\Livewire;
 
+use App\Models\Antrian;
 use App\Models\Pasien;
+use App\Models\PengaturanKlinik;
+use App\Models\Poli;
+use App\Services\ThermalPrinter;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Title;
 
 #[Layout('components.layouts.app')]
-#[Title('Pendaftaran Pasien')]  
 class PendaftaranPasien extends Component
 {
     use WithPagination;
 
-    
     public string $title = 'Pendaftaran Pasien';
 
     // Pencarian
@@ -32,9 +34,12 @@ class PendaftaranPasien extends Component
     public ?string $no_hp = null;
     public ?string $alamat = null;
 
+    // Hanya dipakai saat menambah pasien baru — langsung antrikan ke poli
+    public ?int $poli_id = null;
+
     protected function rules(): array
     {
-        return [
+        $rules = [
             'nama'          => 'required|string|max:255',
             'nik'           => 'nullable|string|max:20',
             'tanggal_lahir' => 'nullable|date',
@@ -42,10 +47,18 @@ class PendaftaranPasien extends Component
             'no_hp'         => 'nullable|string|max:20',
             'alamat'        => 'nullable|string|max:500',
         ];
+
+        // Poli cuma wajib diisi saat menambah pasien BARU, bukan saat edit data pasien lama
+        if (! $this->editId) {
+            $rules['poli_id'] = 'required|exists:polis,id';
+        }
+
+        return $rules;
     }
 
     protected array $messages = [
-        'nama.required' => 'Nama pasien wajib diisi.',
+        'nama.required'    => 'Nama pasien wajib diisi.',
+        'poli_id.required' => 'Pilih poli tujuan untuk mengantrikan pasien.',
     ];
 
     // Reset halaman pagination tiap kali pencarian berubah
@@ -85,16 +98,82 @@ class PendaftaranPasien extends Component
     {
         $data = $this->validate();
 
+        // ===== Mode edit: cuma update data pasien, tidak bikin antrian baru =====
         if ($this->editId) {
-            Pasien::findOrFail($this->editId)->update($data);
+            Pasien::findOrFail($this->editId)->update([
+                'nama'          => $data['nama'],
+                'nik'           => $data['nik'] ?? null,
+                'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
+                'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
+                'no_hp'         => $data['no_hp'] ?? null,
+                'alamat'        => $data['alamat'] ?? null,
+            ]);
+
             session()->flash('sukses', 'Data pasien berhasil diperbarui.');
-        } else {
-            $data['no_rm'] = $this->generateNoRm();
-            Pasien::create($data);
-            session()->flash('sukses', 'Pasien baru berhasil didaftarkan dengan No. RM ' . $data['no_rm'] . '.');
+            $this->tutupForm();
+
+            return;
         }
 
+        // ===== Mode tambah baru: simpan pasien + antrikan langsung ke poli =====
+        DB::transaction(function () use ($data) {
+            $pasien = Pasien::create([
+                'no_rm'         => $this->generateNoRm(),
+                'nama'          => $data['nama'],
+                'nik'           => $data['nik'] ?? null,
+                'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
+                'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
+                'no_hp'         => $data['no_hp'] ?? null,
+                'alamat'        => $data['alamat'] ?? null,
+            ]);
+
+            $poli = Poli::findOrFail($data['poli_id']);
+
+            $urutan = Antrian::where('poli_id', $poli->id)
+                ->whereDate('tanggal', today())
+                ->count() + 1;
+
+            $antrian = Antrian::create([
+                'pasien_id'    => $pasien->id,
+                'poli_id'      => $poli->id,
+                'kode_antrian' => $poli->kode . '-' . str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
+                'status'       => 'menunggu',
+                'tanggal'      => today(),
+            ]);
+
+            $this->cetakTiketPoli($antrian, $poli, $pasien);
+
+            session()->flash(
+                'sukses',
+                'Pasien ' . $pasien->nama . ' berhasil didaftarkan dengan No. RM ' . $pasien->no_rm
+                    . ', diantrikan ke ' . $poli->nama . ' dengan nomor ' . $antrian->kode_antrian
+                    . '. Tiket sedang dicetak — kalau tidak keluar, cetak ulang lewat menu "Cetak Antrian".'
+            );
+        });
+
         $this->tutupForm();
+    }
+
+    /**
+     * Coba cetak otomatis tiket antrian poli ke printer thermal.
+     * Tidak menggagalkan proses pendaftaran kalau printer bermasalah —
+     * staf masih bisa cetak ulang manual lewat menu "Cetak Antrian".
+     */
+    private function cetakTiketPoli(Antrian $antrian, Poli $poli, Pasien $pasien): void
+    {
+        if (config('printer.connection') === 'none') {
+            return;
+        }
+
+        $namaKlinik = PengaturanKlinik::first()?->nama_klinik ?? 'SIM-KLINIK';
+
+        app(ThermalPrinter::class)->cetakTiketPoli(
+            $antrian->kode_antrian,
+            $poli->nama,
+            $pasien->nama,
+            $namaKlinik,
+            now()
+        );
     }
 
     public function hapus(int $id): void
@@ -121,7 +200,7 @@ class PendaftaranPasien extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['editId', 'nama', 'nik', 'tanggal_lahir', 'jenis_kelamin', 'no_hp', 'alamat']);
+        $this->reset(['editId', 'nama', 'nik', 'tanggal_lahir', 'jenis_kelamin', 'no_hp', 'alamat', 'poli_id']);
         $this->resetErrorBag();
     }
 
@@ -138,6 +217,7 @@ class PendaftaranPasien extends Component
 
         return view('livewire.pendaftaran-pasien', [
             'pasiens' => $pasiens,
+            'polis'   => Poli::where('aktif', true)->orderBy('kode')->get(),
         ]);
     }
 }

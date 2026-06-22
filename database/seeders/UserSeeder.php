@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             ['name' => 'King Nabil',       'email' => 'admin@simklinik.test',       'role' => Role::Admin],
             ['name' => 'Siti Resepsionis', 'email' => 'resepsionis@simklinik.test', 'role' => Role::Resepsionis],
             ['name' => 'dr. Hendra',       'email' => 'dokter@simklinik.test',      'role' => Role::Dokter],
-            ['name' => 'Budi Kasir',       'email' => 'kasir@simklinik.test',       'role' => Role::Kasir],
+            ['name' => 'Rudi Rekam Medis', 'email' => 'rekammedis@simklinik.test',  'role' => Role::PetugasRekamMedis],
             ['name' => 'Apt. Rina',        'email' => 'apoteker@simklinik.test',    'role' => Role::Apoteker],
         ];
 

@@ -27,3 +27,33 @@
         @apply text-[11px] font-medium px-2.5 py-1 rounded-full;
     }
 }
+
+/* ===================== CETAK TIKET THERMAL ===================== */
+/* .print-ticket disembunyikan di layar biasa, hanya muncul saat window.print() dipanggil */
+.print-ticket {
+    display: none;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-ticket {
+        display: block !important;
+        visibility: visible !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 58mm;
+    }
+
+    .print-ticket * {
+        visibility: visible !important;
+    }
+
+    @page {
+        size: 58mm auto;
+        margin: 0;
+    }
+}

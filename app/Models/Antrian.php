@@ -30,4 +30,9 @@ class Antrian extends Model
     {
         return $this->hasOne(Transaksi::class);
     }
+
+    public function rekamMedis(): HasOne
+    {
+        return $this->hasOne(RekamMedis::class);
+    }
 }

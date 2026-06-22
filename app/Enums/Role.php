@@ -7,7 +7,7 @@ enum Role: string
     case Admin = 'admin';
     case Resepsionis = 'resepsionis';
     case Dokter = 'dokter';
-    case Kasir = 'kasir';
+    case PetugasRekamMedis = 'petugas_rekam_medis';
     case Apoteker = 'apoteker';
 
     /**
@@ -16,11 +16,11 @@ enum Role: string
     public function label(): string
     {
         return match ($this) {
-            self::Admin       => 'Admin',
-            self::Resepsionis => 'Resepsionis',
-            self::Dokter      => 'Dokter',
-            self::Kasir       => 'Kasir',
-            self::Apoteker    => 'Apoteker',
+            self::Admin             => 'Admin',
+            self::Resepsionis       => 'Resepsionis',
+            self::Dokter            => 'Dokter',
+            self::PetugasRekamMedis => 'Petugas Rekam Medis',
+            self::Apoteker          => 'Apoteker',
         };
     }
 
