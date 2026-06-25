@@ -2,12 +2,14 @@
 
     {{-- Notifikasi --}}
     @if (session('sukses'))
-        <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+            class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
             {{ session('sukses') }}
         </div>
     @endif
     @if (session('gagal'))
-        <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+            class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
             {{ session('gagal') }}
         </div>
     @endif

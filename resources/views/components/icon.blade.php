@@ -24,6 +24,7 @@
         'logout' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 21H6a2 2 0 01-2-2V5a2 2 0 012-2h3"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 17l5-5-5-5"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12H9"/>',
         'download' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14"/>',
         'printer' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5"/><rect x="4" y="9" width="16" height="7" rx="1.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 14h10v6a1 1 0 01-1 1H8a1 1 0 01-1-1v-6z"/>',
+        'video' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/>',
     ];
 @endphp
 

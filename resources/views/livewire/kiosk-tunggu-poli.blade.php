@@ -16,25 +16,25 @@
             this.tanggal = sekarang.toLocaleDateString('id-ID', opsiTanggal);
         }
     }"
-    class="min-h-screen bg-slate-100 flex flex-col font-sans overflow-hidden select-none"
+    class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col font-sans overflow-hidden select-none"
 >
-    {{-- ================= HEADER TAMPILAN ================= --}}
-    <div class="bg-white border-b-4 border-rose-600 px-8 py-4 flex items-center justify-between shadow-md">
+    {{-- ================= HEADER ================= --}}
+    <div class="bg-white/95 backdrop-blur-sm border-b-4 border-klinik-blue px-8 py-4 flex items-center justify-between shadow-lg z-10">
         <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-200">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-klinik-blue to-sky-700 flex items-center justify-center text-white shadow-lg shadow-klinik-blue/30">
                 <x-icon name="cross" class="w-8 h-8" />
             </div>
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-tight">SIM-KLINIK UTAMA</h1>
-                <p class="text-xs font-bold text-rose-600 uppercase tracking-widest">Sistem Informasi Manajemen Antrian</p>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-tight drop-shadow-sm">SIM-KLINIK UTAMA</h1>
+                <p class="text-xs font-bold text-sky-600 uppercase tracking-[0.15em]">Sistem Informasi Manajemen Antrian</p>
             </div>
         </div>
 
         <div class="flex items-center gap-6">
             <button
                 @click="suaraAktif = !suaraAktif; localStorage.setItem('simklinik_suara_poli', suaraAktif); if(!suaraAktif) window.speechSynthesis.cancel();"
-                :class="suaraAktif ? 'bg-emerald-600 text-white shadow-emerald-100' : 'bg-slate-200 text-slate-600'"
-                class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-md"
+                :class="suaraAktif ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-200/50' : 'bg-slate-200 text-slate-500'"
+                class="flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
                     <path x-show="suaraAktif" stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/>
@@ -44,82 +44,127 @@
             </button>
 
             <div class="text-right border-l-2 border-slate-200 pl-6">
-                <p x-text="waktu" class="text-4xl font-mono font-black text-slate-800 tracking-tight leading-none"></p>
+                <p x-text="waktu" class="text-4xl font-mono font-black text-slate-800 tracking-tight leading-none drop-shadow-sm"></p>
                 <p x-text="tanggal" class="text-sm font-bold text-slate-500 mt-1 uppercase tracking-wide"></p>
             </div>
         </div>
     </div>
 
-    {{-- ================= KONTEN UTAMA (FULL-WIDTH LAYOUT) ================= --}}
-    <div class="flex-1 flex flex-col gap-6 p-6 overflow-hidden">
+    {{-- ================= KONTEN UTAMA ================= --}}
+    <div class="flex-1 flex flex-col gap-5 p-6 overflow-hidden">
         
-        {{-- Row Atas: Panggilan Utama & Video --}}
-        <div class="grid grid-cols-12 gap-6 flex-1">
+        {{-- Row Atas: Panggilan + Video --}}
+        <div class="grid grid-cols-12 gap-5 flex-1">
             
-            <div class="col-span-5 bg-rose-600 text-white rounded-3xl flex flex-col justify-between overflow-hidden shadow-xl shadow-rose-200 relative">
-                <div class="bg-rose-700 text-center py-5 font-black text-xl uppercase tracking-widest border-b border-rose-500/30">
+            {{-- Panel Panggilan --}}
+            <div class="col-span-5 bg-gradient-to-b from-klinik-blue to-sky-700 text-white rounded-3xl flex flex-col justify-between overflow-hidden shadow-2xl shadow-klinik-blue/40 relative">
+                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_70%)] pointer-events-none"></div>
+                <div class="bg-sky-800/50 text-center py-5 font-black text-xl uppercase tracking-[0.15em] border-b border-white/10 backdrop-blur-sm relative z-10">
                     ANTRIAN DIPANGGIL
                 </div>
                 
-                <div class="flex-1 flex items-center justify-center py-6">
+                <div class="flex-1 flex items-center justify-center py-6 relative z-10">
                     @if($dipanggil->isEmpty())
-                        <p class="text-7xl font-black tracking-tighter opacity-40">—</p>
+                        <p class="text-xl font-black tracking-tighter opacity-30 select-none">—</p>
                     @else
-                        <p class="text-[10rem] font-mono font-black tracking-tight drop-shadow-[0_6px_10px_rgba(0,0,0,0.25)] animate-pulse">
+                        <p class="text-[10rem] font-mono font-black tracking-tight drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)] animate-pulse select-none">
                             {{ $dipanggil->first()->kode_antrian }}
                         </p>
                     @endif
                 </div>
                 
-                <div class="bg-rose-800 text-center py-6 border-t border-rose-500/30">
-                    <p class="text-3xl font-black uppercase tracking-wider">
+                <div class="bg-sky-800/80 text-center py-6 border-t border-white/10 backdrop-blur-sm relative z-10">
+                    <p class="text-3xl font-black uppercase tracking-wider drop-shadow-sm">
                         {{ $dipanggil->isEmpty() ? 'BELUM ADA ANTRIAN' : $dipanggil->first()->poli->nama }}
                     </p>
                 </div>
+
+                {{-- Decorative dots --}}
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+                </div>
             </div>
 
-            <div class="col-span-7 bg-slate-900 rounded-3xl shadow-xl flex items-center justify-center relative overflow-hidden group border border-slate-800">
-                <div class="absolute inset-0 bg-slate-950/60 flex flex-col items-center justify-center z-10">
-                    <div class="w-24 h-24 bg-white/10 group-hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-xl backdrop-blur-sm group-hover:scale-110 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-12 h-12 ml-1">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
+            {{-- Panel Video --}}
+            <div class="col-span-7 bg-gradient-to-br from-slate-800 to-slate-950 rounded-3xl shadow-2xl flex items-center justify-center relative overflow-hidden group border border-white/5">
+                @if ($media)
+                    <video id="kiosk-video" x-ref="video"
+                        class="absolute inset-0 w-full h-full object-cover" autoplay loop playsinline
+                        @click="if ($refs.video.paused) { $refs.video.play() } else { $refs.video.pause() }">
+                        <source src="{{ $media->url() }}" type="{{ $media->mime_type }}">
+                    </video>
+
+                    {{-- Tombol Play/Pause overlay --}}
+                    <div
+                        x-data="{ show: false }"
+                        @mouseenter="show = true" @mouseleave="show = false"
+                        class="absolute inset-0 z-10 flex items-center justify-center"
+                    >
+                        <button x-cloak x-show="show"
+                            @click="if ($refs.video.paused) { $refs.video.play() } else { $refs.video.pause() }"
+                            class="w-16 h-16 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-white/20"
+                        >
+                            <svg x-show="$refs.video?.paused" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-8 h-8 ml-1">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            <svg x-show="!$refs.video?.paused" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-8 h-8">
+                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                            </svg>
+                        </button>
                     </div>
-                    <span class="text-xs font-bold text-slate-400 mt-4 tracking-widest uppercase opacity-70">Media Informasi Penyuluhan</span>
-                </div>
-                <div class="absolute top-4 right-4 bg-black/40 text-[10px] text-slate-400 font-mono px-2 py-0.5 rounded border border-slate-700">1080p Fhd</div>
+
+                    <div class="absolute bottom-4 right-4 bg-black/60 text-[10px] text-white/70 font-mono px-2.5 py-1 rounded-md backdrop-blur-sm z-10">
+                        {{ $media->judul }}
+                    </div>
+                @else
+                    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05),transparent_70%)]"></div>
+                    <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none"></div>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center z-10 gap-4">
+                        <div class="w-24 h-24 bg-white/5 group-hover:bg-klinik-blue/30 text-white/60 group-hover:text-white rounded-full flex items-center justify-center transition-all duration-500 shadow-xl backdrop-blur-sm group-hover:scale-110 cursor-pointer border border-white/10 group-hover:border-klinik-blue/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-12 h-12 ml-1">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-bold text-slate-500 group-hover:text-slate-300 tracking-[0.2em] uppercase transition-colors duration-500">Media Informasi</span>
+                    </div>
+                    <div class="absolute top-4 right-4 bg-black/50 text-[10px] text-slate-500 font-mono px-2 py-0.5 rounded-md border border-white/5 backdrop-blur-sm z-20">1080p</div>
+                @endif
+
+                {{-- Corner accents --}}
+                <div class="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-white/10 rounded-tl-lg"></div>
+                <div class="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-white/10 rounded-tr-lg"></div>
+                <div class="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-white/10 rounded-bl-lg"></div>
+                <div class="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-white/10 rounded-br-lg"></div>
             </div>
         </div>
 
-        {{-- ================= BARIS BAWAH: MONITOR STATUS PER POLI ================= --}}
-        <div class="h-44 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-md">
-            <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">MONITOR STATUS ANTRIAN SEKARANG PER POLIKLINIK</p>
-            
-            <div class="flex-1 grid grid-cols-4 gap-4">
-                @foreach ($polis->take(4) as $p)
-                    @php
-                        $antrianAktifPoli = $dipanggil->first(function($item) use ($p) {
-                            return ($item->poli_id == $p->id) || (isset($item->poli->id) && $item->poli->id == $p->id);
-                        });
-                    @endphp
+        {{-- ================= BARIS BAWAH: ANTRIAN SELANJUTNYA ================= --}}
+        <div class="flex-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-3xl p-6 flex flex-col shadow-2xl min-h-[200px]">
+            <div class="flex items-center gap-3 mb-4 px-1">
+                <div class="w-2.5 h-2.5 rounded-full bg-klinik-blue animate-pulse"></div>
+                <p class="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">Antrian Selanjutnya Per Poliklinik</p>
+            </div>
 
-                    <div class="flex flex-col justify-between rounded-2xl overflow-hidden shadow-sm border transition-all duration-300 {{ $antrianAktifPoli ? 'bg-amber-500 border-amber-600 text-white shadow-md shadow-amber-100 scale-[1.01]' : 'bg-slate-50 border-slate-200 text-slate-700' }}">
-                        
-                        <div class="flex-1 flex flex-col items-center justify-center py-2">
-                            <span class="text-4xl font-mono font-black tracking-tight">
-                                {{ $antrianAktifPoli ? $antrianAktifPoli->kode_antrian : '—' }}
-                            </span>
-                            <span class="text-[11px] font-bold uppercase mt-0.5 {{ $antrianAktifPoli ? 'text-amber-100' : 'text-slate-400' }}">
-                                {{ $antrianAktifPoli ? 'Sedang Diperiksa' : "$p->menunggu_count Menunggu" }}
-                            </span>
-                        </div>
-
-                        <div class="text-center py-2.5 text-xs font-black uppercase tracking-wide border-t {{ $antrianAktifPoli ? 'bg-amber-600/40 border-amber-600/20 text-white' : 'bg-slate-100 border-slate-200 text-slate-600' }}">
-                            {{ $p->nama }}
-                        </div>
-
+            <div class="flex-1 flex items-stretch gap-5">
+                @forelse ($antrianPerPoli as $id => $item)
+                    @php $poli = $item['poli']; @endphp
+                    <div class="flex-1 bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-2xl px-8 py-6 text-center flex flex-col items-center justify-center shadow-md">
+                        <p class="text-xl font-black uppercase tracking-[0.2em] text-slate-400 mb-3">{{ $poli->nama }}</p>
+                        @forelse ($item['antrians'] as $a)
+                            <p class="text-8xl font-mono font-black text-slate-700 drop-shadow-sm tracking-tight">{{ $a->kode_antrian }}</p>
+                            <p class="text-xl font-bold text-klinik-blue uppercase tracking-wider mt-2">Menunggu</p>
+                        @empty
+                            <p class="text-4xl font-mono font-bold text-slate-300">—</p>
+                            <p class="text-xs font-bold text-slate-300 uppercase tracking-wider mt-2">Kosong</p>
+                        @endforelse
                     </div>
-                @endforeach
+                @empty
+                    <div class="flex items-center justify-center w-full h-full">
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-wide">Tidak ada antrian menunggu</p>
+                    </div>
+                @endforelse
             </div>
         </div>
 

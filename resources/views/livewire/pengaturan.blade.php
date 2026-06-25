@@ -14,7 +14,8 @@
         <p class="text-sm text-gray-400 mb-5">Perbarui nama dan email akun kamu</p>
 
         @if (session('sukses_profil'))
-            <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
                 {{ session('sukses_profil') }}
             </div>
         @endif
@@ -57,7 +58,8 @@
         <p class="text-sm text-gray-400 mb-5">Pastikan pakai password yang kuat dan tidak dipakai di tempat lain</p>
 
         @if (session('sukses_password'))
-            <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
                 {{ session('sukses_password') }}
             </div>
         @endif
@@ -103,7 +105,8 @@
             <p class="text-sm text-gray-400 mb-5">Informasi umum klinik — hanya bisa diubah oleh Admin</p>
 
             @if (session('sukses_klinik'))
-                <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                    class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
                     {{ session('sukses_klinik') }}
                 </div>
             @endif
@@ -165,12 +168,14 @@
             </p>
 
             @if (session('sukses_printer'))
-                <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                    class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 mb-4">
                     {{ session('sukses_printer') }}
                 </div>
             @endif
             @if (session('gagal_printer'))
-                <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                    class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
                     {{ session('gagal_printer') }}
                 </div>
             @endif

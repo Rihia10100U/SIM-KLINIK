@@ -12,6 +12,7 @@ use App\Livewire\Laporan;
 use App\Livewire\LayananPoli;
 use App\Livewire\ManajemenAntrian;
 use App\Livewire\ManajemenUser;
+use App\Livewire\MediaInformasi;
 use App\Livewire\PendaftaranPasien;
 use App\Livewire\Pengaturan;
 use App\Livewire\RekamMedis;
@@ -71,6 +72,8 @@ Route::middleware('auth')->group(function () {
 
         // Halaman gabungan Layanan & Poli (menggantikan /data-layanan & /manajemen-poli)
         Route::get('/layanan-poli', LayananPoli::class)->name('layanan-poli');
+
+        Route::get('/media-informasi', MediaInformasi::class)->name('media-informasi');
 
         // Backward-compatible redirect dari route lama
         Route::redirect('/data-layanan', '/layanan-poli')->name('data-layanan');

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Antrian;
+use App\Models\MediaInformasi;
 use App\Models\Poli;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,61 +13,71 @@ class KioskTungguPoli extends Component
 {
     public string $title = 'Papan Antrian — Pemeriksaan';
 
-    // Properti backend untuk mencatat ID terakhir yang aktif
-    public $lastCalledId = null;
+    // Properti backend untuk mencatat signature (id + updated_at) terakhir yang aktif
+    public string $lastSignature = '';
 
     public function mount()
     {
-        // Ambil ID terakhir di database saat halaman di-load pertama kali.
-        // Mengamankan browser dari auto-play block akibat refresh halaman.
-        $this->lastCalledId = Antrian::whereDate('tanggal', today())
+        $terakhir = Antrian::where('tanggal', today())
             ->where('status', 'dipanggil')
             ->orderByDesc('updated_at')
-            ->value('id') ?? 0;
+            ->first();
+
+        $this->lastSignature = $terakhir ? $terakhir->id . '-' . $terakhir->updated_at->timestamp : '';
     }
 
     public function render()
     {
         $dipanggil = Antrian::with('poli')
-            ->whereDate('tanggal', today())
+            ->where('tanggal', today())
             ->where('status', 'dipanggil')
             ->orderByDesc('updated_at')
             ->limit(6)
             ->get();
 
-        $polis = Poli::where('aktif', true)
-            ->withCount(['antrians as menunggu_count' => fn ($q) => $q
-                ->whereDate('tanggal', today())
-                ->where('status', 'menunggu')])
-            ->withCount(['antrians as selesai_count' => fn ($q) => $q
-                ->whereDate('tanggal', today())
-                ->where('status', 'selesai')])
-            ->orderBy('kode')
-            ->get();
-
         $terbaru = $dipanggil->first();
 
-        // LOGIKA DETEKSI ANTRIAN BARU:
-        if ($terbaru && $this->lastCalledId !== $terbaru->id) {
+        // LOGIKA DETEKSI ANTRIAN BARU / DIPANGGIL ULANG:
+        $currentSignature = $terbaru ? $terbaru->id . '-' . $terbaru->updated_at->timestamp : '';
+        if ($terbaru && $this->lastSignature !== $currentSignature) {
 
-            // Format pengejaan kode agar terbaca per huruf/angka (Contoh: "A-003" menjadi "A  0  0  3")
             $kodeEja = str_replace('-', ' ', $terbaru->kode_antrian);
             $kodeEja = implode('  ', str_split($kodeEja));
             $namaPoli = $terbaru->poli->nama ?? 'Poli Pemeriksaan';
 
-            // Rakit kalimat instruksi panggilan
             $message = "Nomor antrian, {$kodeEja}, silahkan menuju ke, {$namaPoli}";
 
-            // Tembakkan langsung ke event 'queue-called' yang didengar oleh call-queue.js
-            $this->dispatch('queue-called', message: $message);
+            $this->dispatch('queue-called', message: $message, _suaraKey: 'simklinik_suara_poli');
 
-            // Update memori backend
-            $this->lastCalledId = $terbaru->id;
+            $this->lastSignature = $currentSignature;
         }
+
+        // Single query ambil semua poli aktif + antrian menunggu pertama per poli
+        $polis = Poli::where('aktif', true)->orderBy('kode')->get();
+        $poliIds = $polis->pluck('id');
+
+        $antrianPerPoliGroup = Antrian::whereIn('poli_id', $poliIds)
+            ->where('tanggal', today())
+            ->where('status', 'menunggu')
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy('poli_id');
+
+        $antrianPerPoli = $polis->mapWithKeys(function ($poli) use ($antrianPerPoliGroup) {
+            $items = $antrianPerPoliGroup->get($poli->id);
+            $first = $items ? $items->first() : null;
+
+            return [$poli->id => [
+                'poli' => $poli,
+                'antrians' => $first ? collect([$first]) : collect(),
+                'jumlahMenunggu' => $first ? 1 : 0,
+            ]];
+        });
 
         return view('livewire.kiosk-tunggu-poli', [
             'dipanggil' => $dipanggil,
-            'polis' => $polis,
+            'antrianPerPoli' => $antrianPerPoli,
+            'media' => MediaInformasi::aktif()->latest()->first(),
         ]);
     }
 }

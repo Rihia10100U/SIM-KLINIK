@@ -240,8 +240,14 @@ class PendaftaranPasien extends Component
 
     public function panggilUlang(int $id): void
     {
-        $antrian = AntrianPendaftaran::whereDate('tanggal', today())->findOrFail($id);
+        $antrian = AntrianPendaftaran::whereDate('tanggal', today())->with('pasien')->findOrFail($id);
         $antrian->touch();
+
+        $kodeEja = str_replace('-', ' ', $antrian->kode_antrian);
+        $kodeEja = implode('  ', str_split($kodeEja));
+        $message = "Nomor antrian, {$kodeEja}, silahkan menuju ke, loket pendaftaran";
+
+        $this->dispatch('queue-called', message: $message, _suaraKey: 'simklinik_suara_registrasi');
 
         session()->flash('sukses', "Nomor {$antrian->kode_antrian} berhasil dipanggil ulang.");
     }

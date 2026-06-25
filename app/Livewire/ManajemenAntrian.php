@@ -82,7 +82,7 @@ class ManajemenAntrian extends Component
         $poli = Poli::findOrFail($data['poli_id']);
 
         $urutan = Antrian::where('poli_id', $poli->id)
-            ->whereDate('tanggal', today())
+            ->where('tanggal', today())
             ->count() + 1;
 
         Antrian::create([
@@ -100,7 +100,7 @@ class ManajemenAntrian extends Component
     // ===================== PERBAIKAN METHOD PANGGIL =====================
     public function panggil(int $id): void
     {
-        $antrian = Antrian::whereDate('tanggal', today())->with('poli', 'pasien')->findOrFail($id);
+        $antrian = Antrian::where('tanggal', today())->with('poli', 'pasien')->findOrFail($id);
         $antrian->update(['status' => 'dipanggil']);
 
         // Rangkai teks suara agar dieja per huruf/angka oleh JavaScript
@@ -116,7 +116,7 @@ class ManajemenAntrian extends Component
     // ===================== PERBAIKAN METHOD PANGGIL ULANG =====================
     public function panggilUlang(int $id): void
     {
-        $antrian = Antrian::whereDate('tanggal', today())->with('poli', 'pasien')->findOrFail($id);
+        $antrian = Antrian::where('tanggal', today())->with('poli', 'pasien')->findOrFail($id);
 
         // Paksa perbarui field 'updated_at' di DB agar halaman Kiosk TV mendeteksi adanya aktivitas baru
         $antrian->touch();
@@ -135,25 +135,26 @@ class ManajemenAntrian extends Component
 
     public function selesaikan(int $id): void
     {
-        Antrian::whereDate('tanggal', today())->findOrFail($id)->update(['status' => 'selesai']);
+        Antrian::where('tanggal', today())->findOrFail($id)->update(['status' => 'selesai']);
     }
 
     public function batalkan(int $id): void
     {
-        Antrian::whereDate('tanggal', today())->findOrFail($id)->update(['status' => 'batal']);
+        Antrian::where('tanggal', today())->findOrFail($id)->update(['status' => 'batal']);
     }
 
     public function render()
     {
-        $query = Antrian::with(['pasien', 'poli'])
-            ->whereDate('tanggal', today())
+        $semuaAntrian = Antrian::with(['pasien', 'poli'])
+            ->where('tanggal', today())
             ->when($this->filterPoli, fn ($q) => $q->where('poli_id', $this->filterPoli))
-            ->orderBy('created_at');
+            ->orderBy('created_at')
+            ->get();
 
         return view('livewire.manajemen-antrian', [
-            'antrianMenunggu' => (clone $query)->where('status', 'menunggu')->get(),
-            'antrianDipanggil' => (clone $query)->where('status', 'dipanggil')->get(),
-            'antrianSelesai' => (clone $query)->where('status', 'selesai')->get(),
+            'antrianMenunggu' => $semuaAntrian->where('status', 'menunggu'),
+            'antrianDipanggil' => $semuaAntrian->where('status', 'dipanggil'),
+            'antrianSelesai' => $semuaAntrian->where('status', 'selesai'),
             'polis' => Poli::orderBy('kode')->get(),
         ]);
     }

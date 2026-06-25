@@ -106,6 +106,9 @@
                         <a href="{{ route('manajemen-user') }}" class="nav-link {{ request()->routeIs('manajemen-user') ? 'active' : '' }}">
                             <x-icon name="users" /> Manajemen User
                         </a>
+                        <a href="{{ route('media-informasi') }}" class="nav-link {{ request()->routeIs('media-informasi') ? 'active' : '' }}">
+                            <x-icon name="video" /> Media Informasi
+                        </a>
                     @endif
                     <a href="{{ route('pengaturan') }}" class="nav-link {{ request()->routeIs('pengaturan') ? 'active' : '' }}">
                         <x-icon name="cog" /> Pengaturan
