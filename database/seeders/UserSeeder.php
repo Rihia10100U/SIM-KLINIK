@@ -23,8 +23,8 @@ class UserSeeder extends Seeder
             User::updateOrCreate(
                 ['email' => $u['email']],
                 [
-                    'name'     => $u['name'],
-                    'role'     => $u['role'],
+                    'name' => $u['name'],
+                    'role' => $u['role'],
                     'password' => Hash::make('password'),
                 ]
             );

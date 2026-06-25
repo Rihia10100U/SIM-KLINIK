@@ -41,9 +41,9 @@ class KioskTunggu extends Component
 
         return view('livewire.kiosk-tunggu', [
             'pendaftaranDipanggil' => $pendaftaranDipanggil,
-            'poliDipanggil'        => $poliDipanggil,
-            'menungguPerPoli'      => $menungguPerPoli,
-            'pendaftaranMenunggu'  => $pendaftaranMenunggu,
+            'poliDipanggil' => $poliDipanggil,
+            'menungguPerPoli' => $menungguPerPoli,
+            'pendaftaranMenunggu' => $pendaftaranMenunggu,
         ]);
     }
 }

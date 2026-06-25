@@ -19,18 +19,25 @@ class Pengaturan extends Component
 
     // ===== Profil =====
     public string $nama = '';
+
     public string $email = '';
 
     // ===== Ubah Password =====
     public string $passwordSaatIni = '';
+
     public string $passwordBaru = '';
+
     public string $passwordBaruKonfirmasi = '';
 
     // ===== Info Klinik (khusus Admin) =====
     public string $namaKlinik = '';
+
     public string $alamatKlinik = '';
+
     public string $teleponKlinik = '';
+
     public string $jamBuka = '';
+
     public string $jamTutup = '';
 
     // ===== Printer Thermal (khusus Admin) =====
@@ -40,8 +47,8 @@ class Pengaturan extends Component
     {
         $user = Auth::user();
 
-        $this->nama    = $user->name;
-        $this->email   = $user->email;
+        $this->nama = $user->name;
+        $this->email = $user->email;
         $this->isAdmin = $user->isAdmin();
 
         if (! $this->isAdmin) {
@@ -52,18 +59,18 @@ class Pengaturan extends Component
             ['id' => 1],
             [
                 'nama_klinik' => 'SIM-KLINIK',
-                'alamat'      => '',
-                'telepon'     => '',
-                'jam_buka'    => '08:00',
-                'jam_tutup'   => '20:00',
+                'alamat' => '',
+                'telepon' => '',
+                'jam_buka' => '08:00',
+                'jam_tutup' => '20:00',
             ]
         );
 
-        $this->namaKlinik    = $klinik->nama_klinik;
-        $this->alamatKlinik  = (string) $klinik->alamat;
+        $this->namaKlinik = $klinik->nama_klinik;
+        $this->alamatKlinik = (string) $klinik->alamat;
         $this->teleponKlinik = (string) $klinik->telepon;
-        $this->jamBuka       = substr((string) $klinik->jam_buka, 0, 5);
-        $this->jamTutup      = substr((string) $klinik->jam_tutup, 0, 5);
+        $this->jamBuka = substr((string) $klinik->jam_buka, 0, 5);
+        $this->jamTutup = substr((string) $klinik->jam_tutup, 0, 5);
 
         $this->koneksiPrinter = config('printer.connection');
     }
@@ -73,7 +80,7 @@ class Pengaturan extends Component
         $user = Auth::user();
 
         $data = $this->validate([
-            'nama'  => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
         ]);
 
@@ -85,8 +92,8 @@ class Pengaturan extends Component
     public function ubahPassword(): void
     {
         $this->validate([
-            'passwordSaatIni'        => 'required|string',
-            'passwordBaru'           => 'required|string|min:8',
+            'passwordSaatIni' => 'required|string',
+            'passwordBaru' => 'required|string|min:8',
             'passwordBaruKonfirmasi' => 'required|same:passwordBaru',
         ], [
             'passwordBaruKonfirmasi.same' => 'Konfirmasi password baru tidak cocok.',
@@ -112,19 +119,19 @@ class Pengaturan extends Component
         abort_unless(Auth::user()->isAdmin(), 403);
 
         $data = $this->validate([
-            'namaKlinik'    => 'required|string|max:255',
-            'alamatKlinik'  => 'nullable|string|max:500',
+            'namaKlinik' => 'required|string|max:255',
+            'alamatKlinik' => 'nullable|string|max:500',
             'teleponKlinik' => 'nullable|string|max:30',
-            'jamBuka'       => 'required',
-            'jamTutup'      => 'required',
+            'jamBuka' => 'required',
+            'jamTutup' => 'required',
         ]);
 
         PengaturanKlinik::updateOrCreate(['id' => 1], [
             'nama_klinik' => $data['namaKlinik'],
-            'alamat'      => $data['alamatKlinik'],
-            'telepon'     => $data['teleponKlinik'],
-            'jam_buka'    => $data['jamBuka'],
-            'jam_tutup'   => $data['jamTutup'],
+            'alamat' => $data['alamatKlinik'],
+            'telepon' => $data['teleponKlinik'],
+            'jam_buka' => $data['jamBuka'],
+            'jam_tutup' => $data['jamTutup'],
         ]);
 
         session()->flash('sukses_klinik', 'Info klinik berhasil diperbarui.');

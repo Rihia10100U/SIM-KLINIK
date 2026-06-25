@@ -22,10 +22,10 @@ class Aktivitas extends Model
     {
         return match ($this->tipe) {
             'success' => 'bg-green-500',
-            'info'    => 'bg-blue-500',
+            'info' => 'bg-blue-500',
             'warning' => 'bg-amber-500',
-            'danger'  => 'bg-red-500',
-            default   => 'bg-gray-400',
+            'danger' => 'bg-red-500',
+            default => 'bg-gray-400',
         };
     }
 }

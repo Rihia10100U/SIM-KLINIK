@@ -25,10 +25,15 @@ class KioskTungguRegistrasi extends Component
 
         $totalHariIni = AntrianPendaftaran::whereDate('tanggal', today())->count();
 
+        // Data nomor terbaru dikirim ke JS untuk dicek apakah perlu diumumkan
+        $terbaru = $dipanggil->first();
+
         return view('livewire.kiosk-tunggu-registrasi', [
-            'dipanggil'      => $dipanggil,
+            'dipanggil' => $dipanggil,
             'jumlahMenunggu' => $jumlahMenunggu,
-            'totalHariIni'   => $totalHariIni,
+            'totalHariIni' => $totalHariIni,
+            'kodeTerbaru' => $terbaru?->kode_antrian,
+            'idTerbaru' => $terbaru?->id,
         ]);
     }
 }

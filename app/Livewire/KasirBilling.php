@@ -20,23 +20,29 @@ class KasirBilling extends Component
 
     // ===== Modal konfirmasi pembayaran resep =====
     public bool $showModal = false;
+
     public ?int $transaksiId = null;
+
     public string $namaPasien = '';
+
     public array $items = [];
+
     public string $metode = 'Tunai';
+
     public string $cariObat = '';
 
     // ===== Modal rincian riwayat =====
     public bool $showDetailModal = false;
+
     public ?int $detailId = null;
 
     protected function rules(): array
     {
         return [
-            'metode'               => 'required|string',
-            'items'                => 'required|array|min:1',
-            'items.*.nama_item'    => 'required|string|max:255',
-            'items.*.qty'          => 'required|integer|min:1',
+            'metode' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.nama_item' => 'required|string|max:255',
+            'items.*.qty' => 'required|integer|min:1',
             'items.*.harga_satuan' => 'required|integer|min:0',
         ];
     }
@@ -49,15 +55,15 @@ class KasirBilling extends Component
         $transaksi = Transaksi::with(['pasien', 'items'])->findOrFail($transaksiId);
 
         $this->transaksiId = $transaksi->id;
-        $this->namaPasien   = $transaksi->pasien->nama ?? '-';
-        $this->metode        = 'Tunai';
-        $this->cariObat       = '';
+        $this->namaPasien = $transaksi->pasien->nama ?? '-';
+        $this->metode = 'Tunai';
+        $this->cariObat = '';
 
         $this->items = $transaksi->items->map(fn (TransaksiItem $i) => [
-            'obat_id'      => $i->obat_id,
-            'nama_item'    => $i->nama_item,
-            'jenis'        => $i->jenis,
-            'qty'          => $i->qty,
+            'obat_id' => $i->obat_id,
+            'nama_item' => $i->nama_item,
+            'jenis' => $i->jenis,
+            'qty' => $i->qty,
             'harga_satuan' => $i->harga_satuan,
         ])->toArray();
 
@@ -74,7 +80,7 @@ class KasirBilling extends Component
     public function obatOptions(): Collection
     {
         if (strlen($this->cariObat) < 2) {
-            return new Collection();
+            return new Collection;
         }
 
         return Obat::where('nama', 'like', "%{$this->cariObat}%")->limit(8)->get();
@@ -85,10 +91,10 @@ class KasirBilling extends Component
         $obat = Obat::findOrFail($obatId);
 
         $this->items[] = [
-            'obat_id'      => $obat->id,
-            'nama_item'    => $obat->nama,
-            'jenis'        => 'obat',
-            'qty'          => 1,
+            'obat_id' => $obat->id,
+            'nama_item' => $obat->nama,
+            'jenis' => 'obat',
+            'qty' => 1,
             'harga_satuan' => $obat->harga,
         ];
 
@@ -118,7 +124,7 @@ class KasirBilling extends Component
      */
     public function konfirmasiPembayaran(): void
     {
-        $data  = $this->validate();
+        $data = $this->validate();
         $total = $this->total();
 
         DB::transaction(function () use ($data, $total) {
@@ -134,17 +140,17 @@ class KasirBilling extends Component
             $transaksi->items()->delete();
 
             foreach ($this->items as $item) {
-                $qty   = (int) $item['qty'];
+                $qty = (int) $item['qty'];
                 $harga = (int) $item['harga_satuan'];
 
                 TransaksiItem::create([
                     'transaksi_id' => $transaksi->id,
-                    'obat_id'      => $item['obat_id'] ?? null,
-                    'nama_item'    => $item['nama_item'],
-                    'jenis'        => $item['jenis'] ?? 'obat',
-                    'qty'          => $qty,
+                    'obat_id' => $item['obat_id'] ?? null,
+                    'nama_item' => $item['nama_item'],
+                    'jenis' => $item['jenis'] ?? 'obat',
+                    'qty' => $qty,
                     'harga_satuan' => $harga,
-                    'subtotal'     => $qty * $harga,
+                    'subtotal' => $qty * $harga,
                 ]);
 
                 if (! empty($item['obat_id'])) {
@@ -190,8 +196,8 @@ class KasirBilling extends Component
             : null;
 
         return view('livewire.kasir-billing', [
-            'resepMenunggu'   => $resepMenunggu,
-            'riwayat'         => $riwayat,
+            'resepMenunggu' => $resepMenunggu,
+            'riwayat' => $riwayat,
             'detailTransaksi' => $detailTransaksi,
         ]);
     }

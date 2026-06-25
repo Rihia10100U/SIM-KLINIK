@@ -11,9 +11,9 @@ class Obat extends Model
     ];
 
     protected $casts = [
-        'stok'         => 'integer',
+        'stok' => 'integer',
         'stok_minimum' => 'integer',
-        'harga'        => 'integer',
+        'harga' => 'integer',
     ];
 
     /**

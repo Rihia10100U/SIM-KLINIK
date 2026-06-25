@@ -12,7 +12,7 @@ class AntrianSeeder extends Seeder
     public function run(): void
     {
         $pasiens = Pasien::all();
-        $polis   = Poli::all();
+        $polis = Poli::all();
 
         // Pola jumlah kunjungan Senin - Minggu, mengikuti angka di contoh desain dashboard
         $polaMingguan = [
@@ -22,7 +22,7 @@ class AntrianSeeder extends Seeder
         $awalMinggu = today()->startOfWeek(); // Senin minggu berjalan
 
         foreach ($polaMingguan['jumlah'] as $index => $jumlah) {
-            $tanggal   = $awalMinggu->copy()->addDays($index);
+            $tanggal = $awalMinggu->copy()->addDays($index);
             $isHariIni = $tanggal->isToday();
 
             for ($i = 1; $i <= $jumlah; $i++) {
@@ -35,11 +35,11 @@ class AntrianSeeder extends Seeder
                     : fake()->randomElement(['selesai', 'selesai', 'selesai', 'batal']);
 
                 Antrian::create([
-                    'pasien_id'    => $pasiens->random()->id,
-                    'poli_id'      => $poli->id,
-                    'kode_antrian' => $poli->kode . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                    'status'       => $status,
-                    'tanggal'      => $tanggal->toDateString(),
+                    'pasien_id' => $pasiens->random()->id,
+                    'poli_id' => $poli->id,
+                    'kode_antrian' => $poli->kode.'-'.str_pad($i, 3, '0', STR_PAD_LEFT),
+                    'status' => $status,
+                    'tanggal' => $tanggal->toDateString(),
                 ]);
             }
         }

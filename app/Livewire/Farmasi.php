@@ -20,31 +20,43 @@ class Farmasi extends Component
 
     // ===== Modal tambah/edit obat =====
     public bool $showModal = false;
+
     public ?int $editId = null;
+
     public string $nama = '';
+
     public string $kategori = '';
+
     public string $satuan = 'Tablet';
+
     public int $stok = 0;
+
     public int $stok_minimum = 10;
+
     public int $harga = 0;
 
     // ===== Modal atur stok =====
     public bool $showStokModal = false;
+
     public ?int $stokObatId = null;
+
     public string $stokObatNama = '';
+
     public int $stokSaatIni = 0;
+
     public string $jenisPerubahan = 'tambah'; // tambah | kurangi
+
     public ?int $jumlahPerubahan = null;
 
     protected function rules(): array
     {
         return [
-            'nama'         => 'required|string|max:255',
-            'kategori'     => 'nullable|string|max:100',
-            'satuan'       => 'required|string|max:50',
-            'stok'         => 'required|integer|min:0',
+            'nama' => 'required|string|max:255',
+            'kategori' => 'nullable|string|max:100',
+            'satuan' => 'required|string|max:50',
+            'stok' => 'required|integer|min:0',
             'stok_minimum' => 'required|integer|min:0',
-            'harga'        => 'required|integer|min:0',
+            'harga' => 'required|integer|min:0',
         ];
     }
 
@@ -71,13 +83,13 @@ class Farmasi extends Component
     {
         $obat = Obat::findOrFail($id);
 
-        $this->editId       = $obat->id;
-        $this->nama          = $obat->nama;
-        $this->kategori       = (string) $obat->kategori;
-        $this->satuan          = $obat->satuan;
-        $this->stok              = $obat->stok;
-        $this->stok_minimum      = $obat->stok_minimum;
-        $this->harga              = $obat->harga;
+        $this->editId = $obat->id;
+        $this->nama = $obat->nama;
+        $this->kategori = (string) $obat->kategori;
+        $this->satuan = $obat->satuan;
+        $this->stok = $obat->stok;
+        $this->stok_minimum = $obat->stok_minimum;
+        $this->harga = $obat->harga;
 
         $this->showModal = true;
     }
@@ -109,7 +121,7 @@ class Farmasi extends Component
         $urutan = Obat::count() + 1;
 
         do {
-            $kode = 'OBT-' . str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
+            $kode = 'OBT-'.str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
             $urutan++;
         } while (Obat::where('kode_obat', $kode)->exists());
 
@@ -119,7 +131,7 @@ class Farmasi extends Component
     private function resetForm(): void
     {
         $this->reset(['editId', 'nama', 'kategori', 'stok', 'harga']);
-        $this->satuan       = 'Tablet';
+        $this->satuan = 'Tablet';
         $this->stok_minimum = 10;
         $this->resetErrorBag();
     }
@@ -130,10 +142,10 @@ class Farmasi extends Component
     {
         $obat = Obat::findOrFail($id);
 
-        $this->stokObatId      = $obat->id;
-        $this->stokObatNama    = $obat->nama;
-        $this->stokSaatIni     = $obat->stok;
-        $this->jenisPerubahan  = 'tambah';
+        $this->stokObatId = $obat->id;
+        $this->stokObatNama = $obat->nama;
+        $this->stokSaatIni = $obat->stok;
+        $this->jenisPerubahan = 'tambah';
         $this->jumlahPerubahan = null;
         $this->resetErrorBag();
 
@@ -152,7 +164,7 @@ class Farmasi extends Component
             'jumlahPerubahan' => 'required|integer|min:1',
         ], [
             'jumlahPerubahan.required' => 'Jumlah perubahan stok wajib diisi.',
-            'jumlahPerubahan.min'      => 'Jumlah minimal 1.',
+            'jumlahPerubahan.min' => 'Jumlah minimal 1.',
         ]);
 
         $obat = Obat::findOrFail($this->stokObatId);
@@ -164,7 +176,7 @@ class Farmasi extends Component
             $obat->save();
         }
 
-        session()->flash('sukses', 'Stok ' . $obat->nama . ' berhasil diperbarui.');
+        session()->flash('sukses', 'Stok '.$obat->nama.' berhasil diperbarui.');
         $this->tutupStokForm();
     }
 

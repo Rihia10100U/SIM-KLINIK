@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Antrian;
+use App\Models\Layanan;
 use App\Models\Obat;
 use App\Models\Pasien;
 use App\Models\Poli;
@@ -26,33 +27,49 @@ class RekamMedis extends Component
 
     // ===== State modal =====
     public bool $showModal = false;
-    public ?int $editId = null;     // mode: edit data lama
-    public ?int $antrianId = null;  // mode: catat dari antrian yang sedang diperiksa
 
+    public ?int $editId = null;
+
+    public ?int $antrianId = null;
+
+    // ===== Field rekam medis =====
     public ?int $pasien_id = null;
+
     public string $namaPasienTerpilih = '';
+
     public string $cariPasien = '';
+
     public ?int $poli_id = null;
+
     public string $dokter = '';
+
     public string $keluhan = '';
+
     public string $diagnosis = '';
+
     public string $tindakan = '';
+
     public string $catatan = '';
+
     public string $tanggal_periksa = '';
 
-    // ===== Resep (hanya dipakai saat catat dari antrian aktif) =====
+    // ===== LAYANAN: satu pilihan (radio button) =====
+    public ?int $selectedLayananId = null; // ID layanan yang dipilih
+
+    // ===== RESEP OBAT =====
     public array $resep = [];
+
     public string $cariObat = '';
 
     protected function rules(): array
     {
         $rules = [
-            'poli_id'         => 'nullable|exists:polis,id',
-            'dokter'          => 'nullable|string|max:255',
-            'keluhan'         => 'nullable|string|max:1000',
-            'diagnosis'       => 'required|string|max:1000',
-            'tindakan'        => 'nullable|string|max:1000',
-            'catatan'         => 'nullable|string|max:1000',
+            'poli_id' => 'nullable|exists:polis,id',
+            'dokter' => 'nullable|string|max:255',
+            'keluhan' => 'nullable|string|max:1000',
+            'diagnosis' => 'required|string|max:1000',
+            'tindakan' => 'nullable|string|max:1000',
+            'catatan' => 'nullable|string|max:1000',
             'tanggal_periksa' => 'required|date',
         ];
 
@@ -64,7 +81,7 @@ class RekamMedis extends Component
     }
 
     protected array $messages = [
-        'pasien_id.required' => 'Pilih pasien terlebih dahulu dari hasil pencarian.',
+        'pasien_id.required' => 'Pilih pasien dari hasil pencarian.',
         'diagnosis.required' => 'Diagnosis wajib diisi.',
     ];
 
@@ -78,47 +95,54 @@ class RekamMedis extends Component
         $this->pasien_id = null;
     }
 
+    // ===== PASIEN AUTOCOMPLETE =====
+
     public function pasienOptions(): Collection
     {
         if ($this->pasien_id !== null || strlen($this->cariPasien) < 2) {
-            return new Collection();
+            return new Collection;
         }
 
         return Pasien::query()
             ->where('nama', 'like', "%{$this->cariPasien}%")
             ->orWhere('no_rm', 'like', "%{$this->cariPasien}%")
-            ->limit(8)
-            ->get();
+            ->limit(8)->get();
     }
 
     public function pilihPasien(int $id): void
     {
         $pasien = Pasien::findOrFail($id);
-
-        $this->pasien_id  = $pasien->id;
-        $this->cariPasien = $pasien->nama . ' (' . $pasien->no_rm . ')';
+        $this->pasien_id = $pasien->id;
+        $this->cariPasien = $pasien->nama.' ('.$pasien->no_rm.')';
     }
 
-    /**
-     * Hasil pencarian obat untuk ditambahkan ke resep.
-     */
+    // ===== OBAT (resep) =====
+
     public function obatOptions(): Collection
     {
         if (strlen($this->cariObat) < 2) {
-            return new Collection();
+            return new Collection;
         }
 
         return Obat::where('nama', 'like', "%{$this->cariObat}%")->limit(8)->get();
     }
 
-    public function tambahObat(int $obatId): void
+    public function tambahObat(int $id): void
     {
-        $obat = Obat::findOrFail($obatId);
+        $obat = Obat::findOrFail($id);
+
+        // Cegah duplikat obat yang sama
+        $sudahAda = collect($this->resep)->contains(fn ($i) => ($i['obat_id'] ?? null) === $obat->id);
+        if ($sudahAda) {
+            $this->cariObat = '';
+
+            return;
+        }
 
         $this->resep[] = [
-            'obat_id'      => $obat->id,
-            'nama'         => $obat->nama,
-            'qty'          => 1,
+            'obat_id' => $obat->id,
+            'nama' => $obat->nama,
+            'qty' => 1,
             'harga_satuan' => $obat->harga,
         ];
 
@@ -131,33 +155,57 @@ class RekamMedis extends Component
         $this->resep = array_values($this->resep);
     }
 
+    // ===== KALKULASI TOTAL =====
+
+    public function totalLayanan(): int
+    {
+        if (! $this->selectedLayananId) {
+            return 0;
+        }
+
+        $l = Layanan::find($this->selectedLayananId);
+
+        return $l ? $l->harga : 0;
+    }
+
     public function totalResep(): int
     {
         return collect($this->resep)->sum(
-            fn ($item) => (int) ($item['qty'] ?? 0) * (int) ($item['harga_satuan'] ?? 0)
+            fn ($i) => (int) ($i['qty'] ?? 0) * (int) ($i['harga_satuan'] ?? 0)
         );
     }
 
-    /**
-     * Buka form untuk mencatat hasil pemeriksaan dari antrian yang sedang dipanggil/diperiksa.
-     */
+    public function totalTagihan(): int
+    {
+        return $this->totalLayanan() + $this->totalResep();
+    }
+
+    // ===== BUKA FORM =====
+
     public function bukaFormDariAntrian(int $antrianId): void
     {
         $antrian = Antrian::with(['pasien', 'poli'])->findOrFail($antrianId);
 
         $this->resetForm();
-        $this->antrianId          = $antrian->id;
-        $this->pasien_id          = $antrian->pasien_id;
+        $this->antrianId = $antrian->id;
+        $this->pasien_id = $antrian->pasien_id;
         $this->namaPasienTerpilih = $antrian->pasien->nama;
-        $this->poli_id            = $antrian->poli_id;
-        $this->tanggal_periksa    = today()->toDateString();
+        $this->poli_id = $antrian->poli_id;
+        $this->tanggal_periksa = today()->toDateString();
+
+        // Pilih otomatis layanan konsultasi aktif untuk poli ini
+        $konsultasi = Layanan::where('poli_id', $antrian->poli_id)
+            ->where('kategori', 'konsultasi')
+            ->where('aktif', true)
+            ->first();
+
+        if ($konsultasi) {
+            $this->selectedLayananId = $konsultasi->id;
+        }
 
         $this->showModal = true;
     }
 
-    /**
-     * Buka form manual (tanpa antrian, tanpa resep) — untuk catatan ad-hoc.
-     */
     public function bukaFormManual(): void
     {
         $this->resetForm();
@@ -176,36 +224,40 @@ class RekamMedis extends Component
         $rm = RekamMedisModel::with('pasien')->findOrFail($id);
 
         $this->resetForm();
-        $this->editId             = $rm->id;
-        $this->pasien_id          = $rm->pasien_id;
+        $this->editId = $rm->id;
+        $this->pasien_id = $rm->pasien_id;
         $this->namaPasienTerpilih = $rm->pasien->nama;
-        $this->cariPasien         = $rm->pasien->nama . ' (' . $rm->pasien->no_rm . ')';
-        $this->poli_id            = $rm->poli_id;
-        $this->dokter             = (string) $rm->dokter;
-        $this->keluhan            = (string) $rm->keluhan;
-        $this->diagnosis          = $rm->diagnosis;
-        $this->tindakan           = (string) $rm->tindakan;
-        $this->catatan            = (string) $rm->catatan;
-        $this->tanggal_periksa    = $rm->tanggal_periksa->format('Y-m-d');
+        $this->cariPasien = $rm->pasien->nama.' ('.$rm->pasien->no_rm.')';
+        $this->poli_id = $rm->poli_id;
+        $this->dokter = (string) $rm->dokter;
+        $this->keluhan = (string) $rm->keluhan;
+        $this->diagnosis = $rm->diagnosis;
+        $this->tindakan = (string) $rm->tindakan;
+        $this->catatan = (string) $rm->catatan;
+        $this->tanggal_periksa = $rm->tanggal_periksa->format('Y-m-d');
 
         $this->showModal = true;
     }
 
+    // ===== SIMPAN =====
+
     public function simpan(): void
     {
-        $data     = $this->validate();
+        $data = $this->validate();
         $pasienId = $this->pasien_id;
 
         DB::transaction(function () use ($data, $pasienId) {
+
+            // 1. Simpan rekam medis
             $rmData = [
-                'pasien_id'       => $pasienId,
-                'poli_id'         => $data['poli_id'] ?? null,
-                'antrian_id'      => $this->antrianId,
-                'dokter'          => $data['dokter'] ?? null,
-                'keluhan'         => $data['keluhan'] ?? null,
-                'diagnosis'       => $data['diagnosis'],
-                'tindakan'        => $data['tindakan'] ?? null,
-                'catatan'         => $data['catatan'] ?? null,
+                'pasien_id' => $pasienId,
+                'poli_id' => $data['poli_id'] ?? null,
+                'antrian_id' => $this->antrianId,
+                'dokter' => $data['dokter'] ?? null,
+                'keluhan' => $data['keluhan'] ?? null,
+                'diagnosis' => $data['diagnosis'],
+                'tindakan' => $data['tindakan'] ?? null,
+                'catatan' => $data['catatan'] ?? null,
                 'tanggal_periksa' => $data['tanggal_periksa'],
             ];
 
@@ -215,36 +267,64 @@ class RekamMedis extends Component
                 RekamMedisModel::create($rmData);
             }
 
-            // Kalau dicatat dari antrian yang sedang diperiksa:
-            // buat resep (kalau ada item obat) + tandai antrian selesai.
+            // 2. Buat tagihan gabungan kalau dari antrian aktif
             if ($this->antrianId) {
                 $antrian = Antrian::with('poli')->findOrFail($this->antrianId);
 
-                if (! empty($this->resep)) {
-                    $total = $this->totalResep();
+                $semuaItem = [];
+
+                // Layanan terpilih (satu, dari radio button)
+                if ($this->selectedLayananId) {
+                    $l = Layanan::find($this->selectedLayananId);
+                    if ($l) {
+                        $semuaItem[] = [
+                            'obat_id' => null,
+                            'nama_item' => $l->nama,
+                            'jenis' => $l->kategori,
+                            'qty' => 1,
+                            'harga_satuan' => $l->harga,
+                            'subtotal' => $l->harga,
+                        ];
+                    }
+                }
+
+                // Obat resep
+                foreach ($this->resep as $i) {
+                    $qty = (int) ($i['qty'] ?? 1);
+                    $harga = (int) ($i['harga_satuan'] ?? 0);
+
+                    $semuaItem[] = [
+                        'obat_id' => $i['obat_id'],
+                        'nama_item' => $i['nama'],
+                        'jenis' => 'obat',
+                        'qty' => $qty,
+                        'harga_satuan' => $harga,
+                        'subtotal' => $qty * $harga,
+                    ];
+                }
+
+                if (! empty($semuaItem)) {
+                    $total = collect($semuaItem)->sum('subtotal');
 
                     $transaksi = Transaksi::create([
-                        'pasien_id'  => $pasienId,
+                        'pasien_id' => $pasienId,
                         'antrian_id' => $antrian->id,
-                        'deskripsi'  => 'Resep dari pemeriksaan ' . ($antrian->poli->nama ?? '-'),
-                        'jumlah'     => $total,
-                        'metode'     => '-',
-                        'status'     => 'menunggu_pembayaran',
-                        'tanggal'    => today(),
+                        'deskripsi' => 'Tagihan pemeriksaan '.($antrian->poli->nama ?? '-'),
+                        'jumlah' => $total,
+                        'metode' => '-',
+                        'status' => 'menunggu_pembayaran',
+                        'tanggal' => today(),
                     ]);
 
-                    foreach ($this->resep as $item) {
-                        $qty   = (int) $item['qty'];
-                        $harga = (int) $item['harga_satuan'];
-
+                    foreach ($semuaItem as $item) {
                         TransaksiItem::create([
                             'transaksi_id' => $transaksi->id,
-                            'obat_id'      => $item['obat_id'],
-                            'nama_item'    => $item['nama'],
-                            'jenis'        => 'obat',
-                            'qty'          => $qty,
-                            'harga_satuan' => $harga,
-                            'subtotal'     => $qty * $harga,
+                            'obat_id' => $item['obat_id'],
+                            'nama_item' => $item['nama_item'],
+                            'jenis' => $item['jenis'],
+                            'qty' => $item['qty'],
+                            'harga_satuan' => $item['harga_satuan'],
+                            'subtotal' => $item['subtotal'],
                         ]);
                     }
                 }
@@ -253,13 +333,13 @@ class RekamMedis extends Component
             }
         });
 
-        session()->flash(
-            'sukses',
-            $this->antrianId
-                ? 'Hasil pemeriksaan berhasil dicatat' . (! empty($this->resep) ? ' dan resep dikirim ke Apoteker.' : '.')
-                : ($this->editId ? 'Rekam medis berhasil diperbarui.' : 'Rekam medis baru berhasil disimpan.')
-        );
+        $pesan = $this->editId
+            ? 'Rekam medis berhasil diperbarui.'
+            : ($this->antrianId
+                ? 'Pemeriksaan selesai. Tagihan Rp '.number_format($this->totalTagihan(), 0, ',', '.').' dikirim ke Farmasi & Pembayaran.'
+                : 'Rekam medis berhasil disimpan.');
 
+        session()->flash('sukses', $pesan);
         $this->tutupForm();
     }
 
@@ -272,8 +352,9 @@ class RekamMedis extends Component
     private function resetForm(): void
     {
         $this->reset([
-            'editId', 'antrianId', 'pasien_id', 'namaPasienTerpilih', 'cariPasien', 'poli_id', 'dokter',
-            'keluhan', 'diagnosis', 'tindakan', 'catatan', 'tanggal_periksa', 'resep', 'cariObat',
+            'editId', 'antrianId', 'pasien_id', 'namaPasienTerpilih', 'cariPasien',
+            'poli_id', 'dokter', 'keluhan', 'diagnosis', 'tindakan', 'catatan',
+            'tanggal_periksa', 'selectedLayananId', 'resep', 'cariObat',
         ]);
         $this->resetErrorBag();
     }
@@ -293,10 +374,22 @@ class RekamMedis extends Component
             ->latest('tanggal_periksa')
             ->paginate(10);
 
+        // Layanan aktif sesuai poli yang sedang dipilih (untuk radio button)
+        $layanansAktif = $this->poli_id
+            ? Layanan::where('aktif', true)
+                ->where(fn ($q) => $q
+                    ->where('poli_id', $this->poli_id)
+                    ->orWhereNull('poli_id'))
+                ->orderByRaw("FIELD(kategori, 'konsultasi', 'tindakan', 'lainnya')")
+                ->orderBy('nama')
+                ->get()
+            : collect();
+
         return view('livewire.rekam-medis', [
             'antrianAktif' => $antrianAktif,
-            'rekamMedis'   => $rekamMedis,
-            'polis'        => Poli::orderBy('kode')->get(),
+            'rekamMedis' => $rekamMedis,
+            'polis' => Poli::orderBy('kode')->get(),
+            'layanansAktif' => $layanansAktif,
         ]);
     }
 }

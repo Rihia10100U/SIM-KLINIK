@@ -25,11 +25,11 @@ class Dashboard extends Component
     public function render()
     {
         return view('livewire.dashboard', [
-            'statistik'         => $this->getStatistik(),
+            'statistik' => $this->getStatistik(),
             'kunjunganMingguan' => $this->getKunjunganMingguan(),
-            'antrianAktif'      => $this->getAntrianAktif(),
-            'aktivitasTerbaru'  => $this->getAktivitasTerbaru(),
-            'pelayananAktif'    => $this->getPelayananAktif(),
+            'antrianAktif' => $this->getAntrianAktif(),
+            'aktivitasTerbaru' => $this->getAktivitasTerbaru(),
+            'pelayananAktif' => $this->getPelayananAktif(),
         ]);
     }
 
@@ -39,9 +39,9 @@ class Dashboard extends Component
     private function getStatistik(): array
     {
         return [
-            'total_antrian'        => Antrian::whereDate('tanggal', today())->count(),
+            'total_antrian' => Antrian::whereDate('tanggal', today())->count(),
             'pasien_dalam_antrian' => Antrian::whereDate('tanggal', today())->where('status', 'menunggu')->count(),
-            'pendapatan_hari_ini'  => (int) Transaksi::whereDate('tanggal', today())->sum('jumlah'),
+            'pendapatan_hari_ini' => (int) Transaksi::whereDate('tanggal', today())->sum('jumlah'),
         ];
     }
 
@@ -57,7 +57,7 @@ class Dashboard extends Component
             $tanggal = $awalMinggu->copy()->addDays($i);
 
             $hasil[] = [
-                'hari'   => $tanggal->locale('id')->translatedFormat('D'), // Sen, Sel, Rab, ...
+                'hari' => $tanggal->locale('id')->translatedFormat('D'), // Sen, Sel, Rab, ...
                 'jumlah' => Antrian::whereDate('tanggal', $tanggal)->count(),
             ];
         }
@@ -77,9 +77,9 @@ class Dashboard extends Component
             ->limit(4)
             ->get()
             ->map(fn (Antrian $a) => [
-                'kode'   => $a->kode_antrian,
-                'nama'   => $a->pasien->nama,
-                'poli'   => $a->poli->nama,
+                'kode' => $a->kode_antrian,
+                'nama' => $a->pasien->nama,
+                'poli' => $a->poli->nama,
                 'status' => ucfirst($a->status),
             ]);
     }
@@ -107,8 +107,8 @@ class Dashboard extends Component
         return Poli::orderBy('kode')
             ->get()
             ->map(fn (Poli $p) => [
-                'kode'  => $p->kode,
-                'nama'  => $p->nama,
+                'kode' => $p->kode,
+                'nama' => $p->nama,
                 'aktif' => $p->aktif,
             ]);
     }

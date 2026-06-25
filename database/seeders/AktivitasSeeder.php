@@ -19,7 +19,7 @@ class AktivitasSeeder extends Seeder
 
         foreach ($data as $row) {
             Aktivitas::create([
-                'tipe'  => $row['tipe'],
+                'tipe' => $row['tipe'],
                 'pesan' => $row['pesan'],
                 'waktu' => now()->subMinutes($row['menit_lalu']),
             ]);

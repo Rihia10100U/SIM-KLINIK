@@ -16,11 +16,11 @@ enum Role: string
     public function label(): string
     {
         return match ($this) {
-            self::Admin             => 'Admin',
-            self::Resepsionis       => 'Resepsionis',
-            self::Dokter            => 'Dokter',
+            self::Admin => 'Admin',
+            self::Resepsionis => 'Resepsionis',
+            self::Dokter => 'Dokter',
             self::PetugasRekamMedis => 'Petugas Rekam Medis',
-            self::Apoteker          => 'Apoteker',
+            self::Apoteker => 'Apoteker',
         };
     }
 

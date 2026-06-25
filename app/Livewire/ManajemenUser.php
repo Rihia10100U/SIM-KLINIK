@@ -21,28 +21,34 @@ class ManajemenUser extends Component
     public string $cari = '';
 
     public bool $showModal = false;
+
     public ?int $editId = null;
+
     public string $nama = '';
+
     public string $email = '';
+
     public string $role = '';
+
     public string $password = '';
+
     public string $passwordKonfirmasi = '';
 
     protected function rules(): array
     {
         $rules = [
-            'nama'  => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->editId)],
-            'role'  => 'required|in:' . implode(',', array_column(Role::cases(), 'value')),
+            'role' => 'required|in:'.implode(',', array_column(Role::cases(), 'value')),
         ];
 
         if (! $this->editId) {
             // Tambah user baru: password wajib
-            $rules['password']           = 'required|string|min:8';
+            $rules['password'] = 'required|string|min:8';
             $rules['passwordKonfirmasi'] = 'required|same:password';
         } elseif ($this->password !== '') {
             // Edit user: password opsional, divalidasi hanya kalau diisi
-            $rules['password']           = 'string|min:8';
+            $rules['password'] = 'string|min:8';
             $rules['passwordKonfirmasi'] = 'required|same:password';
         }
 
@@ -74,12 +80,12 @@ class ManajemenUser extends Component
     {
         $user = User::findOrFail($id);
 
-        $this->editId             = $user->id;
-        $this->nama                = $user->name;
-        $this->email                 = $user->email;
-        $this->role                   = $user->role->value;
-        $this->password                = '';
-        $this->passwordKonfirmasi        = '';
+        $this->editId = $user->id;
+        $this->nama = $user->name;
+        $this->email = $user->email;
+        $this->role = $user->role->value;
+        $this->password = '';
+        $this->passwordKonfirmasi = '';
 
         $this->resetErrorBag();
         $this->showModal = true;
@@ -92,9 +98,9 @@ class ManajemenUser extends Component
         if ($this->editId) {
             $user = User::findOrFail($this->editId);
 
-            $user->name  = $data['nama'];
+            $user->name = $data['nama'];
             $user->email = $data['email'];
-            $user->role  = $data['role'];
+            $user->role = $data['role'];
 
             if (! empty($data['password'])) {
                 $user->password = Hash::make($data['password']);
@@ -105,9 +111,9 @@ class ManajemenUser extends Component
             session()->flash('sukses', 'Data user berhasil diperbarui.');
         } else {
             User::create([
-                'name'     => $data['nama'],
-                'email'    => $data['email'],
-                'role'     => $data['role'],
+                'name' => $data['nama'],
+                'email' => $data['email'],
+                'role' => $data['role'],
                 'password' => Hash::make($data['password']),
             ]);
 

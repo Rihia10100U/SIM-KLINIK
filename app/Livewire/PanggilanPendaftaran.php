@@ -20,19 +20,28 @@ class PanggilanPendaftaran extends Component
 
     // ===== Modal daftarkan =====
     public bool $showModal = false;
+
     public ?int $antrianPendaftaranId = null;
+
     public string $kodeAntrianPendaftaran = '';
 
     public bool $pasienBaru = false;
+
     public ?int $pasien_id = null;
+
     public string $cariPasien = '';
 
     // Field pasien baru
     public string $nama = '';
+
     public string $nik = '';
+
     public string $tanggal_lahir = '';
+
     public string $jenis_kelamin = '';
+
     public string $no_hp = '';
+
     public string $alamat = '';
 
     public ?int $poli_id = null;
@@ -44,12 +53,12 @@ class PanggilanPendaftaran extends Component
         ];
 
         if ($this->pasienBaru) {
-            $rules['nama']          = 'required|string|max:255';
-            $rules['nik']           = 'nullable|string|max:20';
+            $rules['nama'] = 'required|string|max:255';
+            $rules['nik'] = 'nullable|string|max:20';
             $rules['tanggal_lahir'] = 'nullable|date';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
-            $rules['no_hp']         = 'nullable|string|max:20';
-            $rules['alamat']        = 'nullable|string|max:500';
+            $rules['no_hp'] = 'nullable|string|max:20';
+            $rules['alamat'] = 'nullable|string|max:500';
         } else {
             $rules['pasien_id'] = 'required|exists:pasiens,id';
         }
@@ -59,8 +68,8 @@ class PanggilanPendaftaran extends Component
 
     protected array $messages = [
         'pasien_id.required' => 'Pilih pasien dari hasil pencarian, atau centang "Pasien Baru".',
-        'nama.required'      => 'Nama pasien wajib diisi.',
-        'poli_id.required'   => 'Pilih poli tujuan.',
+        'nama.required' => 'Nama pasien wajib diisi.',
+        'poli_id.required' => 'Pilih poli tujuan.',
     ];
 
     public function panggil(int $id): void
@@ -72,7 +81,7 @@ class PanggilanPendaftaran extends Component
     {
         $antrian = AntrianPendaftaran::whereDate('tanggal', today())->findOrFail($id);
 
-        $this->antrianPendaftaranId  = $antrian->id;
+        $this->antrianPendaftaranId = $antrian->id;
         $this->kodeAntrianPendaftaran = $antrian->kode_antrian;
         $this->resetFormPasien();
         $this->showModal = true;
@@ -87,9 +96,9 @@ class PanggilanPendaftaran extends Component
 
     public function toggleModePasien(bool $baru): void
     {
-        $this->pasienBaru  = $baru;
-        $this->pasien_id   = null;
-        $this->cariPasien  = '';
+        $this->pasienBaru = $baru;
+        $this->pasien_id = null;
+        $this->cariPasien = '';
         $this->resetErrorBag();
     }
 
@@ -101,7 +110,7 @@ class PanggilanPendaftaran extends Component
     public function pasienOptions(): Collection
     {
         if ($this->pasien_id !== null || strlen($this->cariPasien) < 2) {
-            return new Collection();
+            return new Collection;
         }
 
         return Pasien::query()
@@ -115,8 +124,8 @@ class PanggilanPendaftaran extends Component
     {
         $pasien = Pasien::findOrFail($id);
 
-        $this->pasien_id  = $pasien->id;
-        $this->cariPasien = $pasien->nama . ' (' . $pasien->no_rm . ')';
+        $this->pasien_id = $pasien->id;
+        $this->cariPasien = $pasien->nama.' ('.$pasien->no_rm.')';
     }
 
     public function daftarkan(): void
@@ -126,13 +135,13 @@ class PanggilanPendaftaran extends Component
         DB::transaction(function () use ($data) {
             if ($this->pasienBaru) {
                 $pasien = Pasien::create([
-                    'no_rm'         => $this->generateNoRm(),
-                    'nama'          => $data['nama'],
-                    'nik'           => $data['nik'] ?? null,
+                    'no_rm' => $this->generateNoRm(),
+                    'nama' => $data['nama'],
+                    'nik' => $data['nik'] ?? null,
                     'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
                     'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
-                    'no_hp'         => $data['no_hp'] ?? null,
-                    'alamat'        => $data['alamat'] ?? null,
+                    'no_hp' => $data['no_hp'] ?? null,
+                    'alamat' => $data['alamat'] ?? null,
                 ]);
             } else {
                 $pasien = Pasien::findOrFail($data['pasien_id']);
@@ -145,22 +154,22 @@ class PanggilanPendaftaran extends Component
                 ->count() + 1;
 
             $antrian = Antrian::create([
-                'pasien_id'    => $pasien->id,
-                'poli_id'      => $poli->id,
-                'kode_antrian' => $poli->kode . '-' . str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
-                'status'       => 'menunggu',
-                'tanggal'      => today(),
+                'pasien_id' => $pasien->id,
+                'poli_id' => $poli->id,
+                'kode_antrian' => $poli->kode.'-'.str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
+                'status' => 'menunggu',
+                'tanggal' => today(),
             ]);
 
             AntrianPendaftaran::findOrFail($this->antrianPendaftaranId)->update([
-                'status'    => 'selesai',
+                'status' => 'selesai',
                 'pasien_id' => $pasien->id,
             ]);
 
             $this->cetakTiketPoli($antrian, $poli, $pasien);
 
-            session()->flash('sukses', $pasien->nama . ' berhasil didaftarkan dan diantrikan ke ' . $poli->nama
-                . '. Nomor ' . $antrian->kode_antrian . ' sedang dicetak — kalau tidak keluar, cetak ulang lewat menu "Cetak Antrian".');
+            session()->flash('sukses', $pasien->nama.' berhasil didaftarkan dan diantrikan ke '.$poli->nama
+                .'. Nomor '.$antrian->kode_antrian.' sedang dicetak — kalau tidak keluar, cetak ulang lewat menu "Cetak Antrian".');
         });
 
         $this->tutupForm();
@@ -190,11 +199,11 @@ class PanggilanPendaftaran extends Component
 
     private function generateNoRm(): string
     {
-        $tahun  = now()->year;
+        $tahun = now()->year;
         $urutan = Pasien::whereYear('created_at', $tahun)->count() + 1;
 
         do {
-            $noRm = 'RM-' . $tahun . '-' . str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
+            $noRm = 'RM-'.$tahun.'-'.str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
             $urutan++;
         } while (Pasien::where('no_rm', $noRm)->exists());
 
@@ -213,7 +222,7 @@ class PanggilanPendaftaran extends Component
     public function render()
     {
         return view('livewire.panggilan-pendaftaran', [
-            'antrianMenunggu'  => AntrianPendaftaran::whereDate('tanggal', today())
+            'antrianMenunggu' => AntrianPendaftaran::whereDate('tanggal', today())
                 ->where('status', 'menunggu')
                 ->orderBy('created_at')
                 ->get(),

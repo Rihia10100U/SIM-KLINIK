@@ -10,9 +10,9 @@ class LayananSeeder extends Seeder
 {
     public function run(): void
     {
-        $poliUmum      = Poli::where('kode', 'A')->first();
-        $poliGigi      = Poli::where('kode', 'B')->first();
-        $poliAnak      = Poli::where('kode', 'C')->first();
+        $poliUmum = Poli::where('kode', 'A')->first();
+        $poliGigi = Poli::where('kode', 'B')->first();
+        $poliAnak = Poli::where('kode', 'C')->first();
         $poliKandungan = Poli::where('kode', 'D')->first();
 
         $data = [

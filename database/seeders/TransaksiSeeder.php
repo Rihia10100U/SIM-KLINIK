@@ -19,9 +19,9 @@ class TransaksiSeeder extends Seeder
             Transaksi::create([
                 'pasien_id' => $pasiens->random()->id,
                 'deskripsi' => 'Pembayaran layanan klinik',
-                'jumlah'    => $jumlah,
-                'metode'    => fake()->randomElement(['Tunai', 'Transfer', 'QRIS']),
-                'tanggal'   => now()->toDateString(),
+                'jumlah' => $jumlah,
+                'metode' => fake()->randomElement(['Tunai', 'Transfer', 'QRIS']),
+                'tanggal' => now()->toDateString(),
             ]);
         }
 

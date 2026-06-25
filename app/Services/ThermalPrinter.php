@@ -17,18 +17,18 @@ class ThermalPrinter
     {
         return $this->cetak(function (Printer $printer) use ($kodeAntrian, $namaKlinik, $waktu) {
             $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text($namaKlinik . "\n");
+            $printer->text($namaKlinik."\n");
             $printer->text("Nomor Antrian Pendaftaran\n");
             $printer->feed();
 
             $printer->setTextSize(4, 4);
             $printer->setEmphasis(true);
-            $printer->text($kodeAntrian . "\n");
+            $printer->text($kodeAntrian."\n");
             $printer->setEmphasis(false);
             $printer->setTextSize(1, 1);
 
             $printer->feed();
-            $printer->text($waktu->format('d-m-Y H:i') . "\n");
+            $printer->text($waktu->format('d-m-Y H:i')."\n");
             $printer->text("Silakan tunggu nomor Anda dipanggil\n");
         });
     }
@@ -45,20 +45,20 @@ class ThermalPrinter
     ): bool {
         return $this->cetak(function (Printer $printer) use ($kodeAntrian, $namaPoli, $namaPasien, $namaKlinik, $waktu) {
             $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text($namaKlinik . "\n");
+            $printer->text($namaKlinik."\n");
             $printer->text("Nomor Antrian Poli\n");
             $printer->feed();
 
             $printer->setTextSize(4, 4);
             $printer->setEmphasis(true);
-            $printer->text($kodeAntrian . "\n");
+            $printer->text($kodeAntrian."\n");
             $printer->setEmphasis(false);
             $printer->setTextSize(1, 1);
 
             $printer->feed();
-            $printer->text($namaPoli . "\n");
-            $printer->text($namaPasien . "\n");
-            $printer->text($waktu->format('d-m-Y H:i') . "\n");
+            $printer->text($namaPoli."\n");
+            $printer->text($namaPasien."\n");
+            $printer->text($waktu->format('d-m-Y H:i')."\n");
             $printer->text("Silakan tunggu di area poli\n");
         });
     }
@@ -106,8 +106,8 @@ class ThermalPrinter
         return match (config('printer.connection')) {
             'network' => new NetworkPrintConnector(config('printer.host'), config('printer.port')),
             'windows' => new WindowsPrintConnector(config('printer.windows_name')),
-            'usb'     => new FilePrintConnector(config('printer.usb_path')),
-            default   => null,
+            'usb' => new FilePrintConnector(config('printer.usb_path')),
+            default => null,
         };
     }
 }

@@ -22,7 +22,7 @@ class Laporan extends Component
 
     public function mount(): void
     {
-        $this->dari   = today()->startOfMonth()->toDateString();
+        $this->dari = today()->startOfMonth()->toDateString();
         $this->sampai = today()->toDateString();
     }
 
@@ -31,10 +31,10 @@ class Laporan extends Component
         $hariIni = today();
 
         [$this->dari, $this->sampai] = match ($jenis) {
-            'hari-ini'   => [$hariIni->toDateString(), $hariIni->toDateString()],
+            'hari-ini' => [$hariIni->toDateString(), $hariIni->toDateString()],
             'minggu-ini' => [$hariIni->copy()->startOfWeek()->toDateString(), $hariIni->toDateString()],
-            'bulan-ini'  => [$hariIni->copy()->startOfMonth()->toDateString(), $hariIni->toDateString()],
-            default      => [$this->dari, $this->sampai],
+            'bulan-ini' => [$hariIni->copy()->startOfMonth()->toDateString(), $hariIni->toDateString()],
+            default => [$this->dari, $this->sampai],
         };
     }
 
@@ -51,8 +51,8 @@ class Laporan extends Component
     public function ringkasan(): array
     {
         return [
-            'total_kunjungan'  => Antrian::whereBetween('tanggal', [$this->dari, $this->sampai])->count(),
-            'pasien_baru'      => Pasien::whereBetween('created_at', [$this->dariCarbon(), $this->sampaiCarbon()])->count(),
+            'total_kunjungan' => Antrian::whereBetween('tanggal', [$this->dari, $this->sampai])->count(),
+            'pasien_baru' => Pasien::whereBetween('created_at', [$this->dariCarbon(), $this->sampaiCarbon()])->count(),
             'total_pendapatan' => (int) Transaksi::whereBetween('tanggal', [$this->dari, $this->sampai])->sum('jumlah'),
             'jumlah_transaksi' => Transaksi::whereBetween('tanggal', [$this->dari, $this->sampai])->count(),
         ];
@@ -64,12 +64,12 @@ class Laporan extends Component
     public function kunjunganHarian(): array
     {
         $cursor = Carbon::parse($this->dari);
-        $akhir  = Carbon::parse($this->sampai);
-        $hasil  = [];
+        $akhir = Carbon::parse($this->sampai);
+        $hasil = [];
 
         while ($cursor->lte($akhir)) {
             $hasil[] = [
-                'label'  => $cursor->copy()->locale('id')->translatedFormat('d M'),
+                'label' => $cursor->copy()->locale('id')->translatedFormat('d M'),
                 'jumlah' => Antrian::whereDate('tanggal', $cursor)->count(),
             ];
             $cursor->addDay();
@@ -85,8 +85,8 @@ class Laporan extends Component
             ->get()
             ->groupBy(fn (Transaksi $t) => $t->antrian?->poli?->nama ?? 'Lainnya')
             ->map(fn ($grup, $nama) => [
-                'nama'       => $nama,
-                'jumlah'     => $grup->count(),
+                'nama' => $nama,
+                'jumlah' => $grup->count(),
                 'pendapatan' => $grup->sum('jumlah'),
             ])
             ->sortByDesc('pendapatan')
@@ -116,7 +116,7 @@ class Laporan extends Component
             ->orderBy('tanggal')
             ->get();
 
-        $namaFile = 'laporan-transaksi-' . $this->dari . '-sd-' . $this->sampai . '.csv';
+        $namaFile = 'laporan-transaksi-'.$this->dari.'-sd-'.$this->sampai.'.csv';
 
         return response()->streamDownload(function () use ($transaksis) {
             $handle = fopen('php://output', 'w');
@@ -139,10 +139,10 @@ class Laporan extends Component
     public function render()
     {
         return view('livewire.laporan', [
-            'ringkasan'         => $this->ringkasan(),
-            'kunjunganHarian'   => $this->kunjunganHarian(),
+            'ringkasan' => $this->ringkasan(),
+            'kunjunganHarian' => $this->kunjunganHarian(),
             'pendapatanPerPoli' => $this->pendapatanPerPoli(),
-            'obatTerlaris'      => $this->obatTerlaris(),
+            'obatTerlaris' => $this->obatTerlaris(),
         ]);
     }
 }

@@ -22,7 +22,7 @@ class ObatSeeder extends Seeder
 
         foreach ($data as $i => $row) {
             Obat::updateOrCreate(
-                ['kode_obat' => 'OBT-' . str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)],
+                ['kode_obat' => 'OBT-'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)],
                 $row
             );
         }

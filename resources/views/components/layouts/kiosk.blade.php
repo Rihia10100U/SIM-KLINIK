@@ -6,11 +6,14 @@
     <title>{{ $title ?? 'Kiosk' }} - SIM-KLINIK</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+    {{-- Engine suara terpusat — WAJIB tanpa defer agar fungsi siap sebelum Alpine jalan --}}
+    <script src="{{ asset('js/antrian-speaker.js') }}"></script>
 </head>
 <body class="font-sans text-gray-700 antialiased">
 
     {{ $slot }}
 
-@livewireScripts
+    @livewireScripts
 </body>
 </html>

@@ -12,9 +12,9 @@ class TransaksiItem extends Model
     ];
 
     protected $casts = [
-        'qty'          => 'integer',
+        'qty' => 'integer',
         'harga_satuan' => 'integer',
-        'subtotal'     => 'integer',
+        'subtotal' => 'integer',
     ];
 
     public function transaksi(): BelongsTo

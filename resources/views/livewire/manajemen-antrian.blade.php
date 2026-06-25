@@ -94,7 +94,6 @@
                         </div>
                         <p class="text-sm font-medium text-gray-700 mb-3">{{ $a->pasien->nama }}</p>
                         
-                        {{-- PERUBAHAN DI SINI: Menggunakan flex untuk membagi dua tombol --}}
                         <div class="flex items-center gap-2">
                             <button
                                 wire:click="selesaikan({{ $a->id }})"
@@ -157,7 +156,6 @@
                 </div>
 
                 <form wire:submit="daftarkan" class="space-y-4">
-
                     {{-- Cari pasien --}}
                     <div class="relative">
                         <label class="text-xs font-medium text-gray-500">Cari Pasien</label>

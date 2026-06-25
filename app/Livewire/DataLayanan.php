@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Layanan;
 use App\Models\Poli;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,20 +20,26 @@ class DataLayanan extends Component
     public string $cari = '';
 
     public bool $showModal = false;
+
     public ?int $editId = null;
+
     public string $nama = '';
+
     public string $kategori = 'konsultasi';
+
     public ?int $poli_id = null;
+
     public int $harga = 0;
+
     public bool $aktif = true;
 
     protected function rules(): array
     {
         return [
-            'nama'     => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'kategori' => 'required|in:konsultasi,tindakan,lainnya',
-            'poli_id'  => 'nullable|exists:polis,id',
-            'harga'    => 'required|integer|min:0',
+            'poli_id' => 'nullable|exists:polis,id',
+            'harga' => 'required|integer|min:0',
         ];
     }
 
@@ -58,12 +64,12 @@ class DataLayanan extends Component
     {
         $layanan = Layanan::findOrFail($id);
 
-        $this->editId   = $layanan->id;
-        $this->nama      = $layanan->nama;
-        $this->kategori   = $layanan->kategori;
-        $this->poli_id     = $layanan->poli_id;
-        $this->harga         = $layanan->harga;
-        $this->aktif           = $layanan->aktif;
+        $this->editId = $layanan->id;
+        $this->nama = $layanan->nama;
+        $this->kategori = $layanan->kategori;
+        $this->poli_id = $layanan->poli_id;
+        $this->harga = $layanan->harga;
+        $this->aktif = $layanan->aktif;
 
         $this->showModal = true;
     }
@@ -100,7 +106,7 @@ class DataLayanan extends Component
     {
         $this->reset(['editId', 'nama', 'poli_id', 'harga']);
         $this->kategori = 'konsultasi';
-        $this->aktif    = true;
+        $this->aktif = true;
         $this->resetErrorBag();
     }
 
@@ -114,7 +120,7 @@ class DataLayanan extends Component
 
         return view('livewire.data-layanan', [
             'layanans' => $layanans,
-            'polis'    => Poli::orderBy('kode')->get(),
+            'polis' => Poli::orderBy('kode')->get(),
         ]);
     }
 }

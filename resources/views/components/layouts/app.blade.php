@@ -10,10 +10,8 @@
 <body class="font-sans text-gray-700 antialiased">
 <div class="flex min-h-screen">
 
-    {{-- ===================== SIDEBAR ===================== --}}
     <aside class="w-64 bg-white border-r border-gray-100 hidden lg:flex lg:flex-col">
 
-        {{-- Logo --}}
         <div class="flex items-center gap-2 px-6 py-6">
             <div class="w-9 h-9 rounded-lg bg-klinik-green/10 flex items-center justify-center text-klinik-green">
                 <x-icon name="cross" class="w-6 h-6" />
@@ -31,8 +29,6 @@
                 <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <x-icon name="home" /> Dashboard
                 </a>
-
-                {{-- Kiosk dibagi jadi 3: ambil nomor, papan registrasi, papan poli --}}
                 <a href="{{ route('kiosk.antrian') }}" target="_blank" class="nav-link">
                     <x-icon name="queue" /> Kiosk Ambil Nomor
                 </a>
@@ -53,23 +49,18 @@
                     </div>
                     <div class="space-y-1">
                         @if (auth()->user()->hasRole('admin', 'resepsionis'))
-                            <a href="{{ route('panggilan-pendaftaran') }}" class="nav-link {{ request()->routeIs('panggilan-pendaftaran') ? 'active' : '' }}">
-                                <x-icon name="ticket" /> Panggilan Pendaftaran
+                            <a href="{{ route('pendaftaran-pasien') }}" class="nav-link {{ request()->routeIs('pendaftaran-pasien') ? 'active' : '' }}">
+                                <x-icon name="user-plus" /> Pendaftaran Pasien
                             </a>
                             <a href="{{ route('cetak-antrian') }}" class="nav-link {{ request()->routeIs('cetak-antrian') ? 'active' : '' }}">
                                 <x-icon name="printer" /> Cetak Antrian
                             </a>
-                            <a href="{{ route('pendaftaran-pasien') }}" class="nav-link {{ request()->routeIs('pendaftaran-pasien') ? 'active' : '' }}">
-                                <x-icon name="user-plus" /> Pendaftaran Pasien
-                            </a>
                         @endif
-
                         @if (auth()->user()->hasRole('admin', 'resepsionis', 'dokter', 'petugas_rekam_medis'))
                             <a href="{{ route('manajemen-antrian') }}" class="nav-link {{ request()->routeIs('manajemen-antrian') ? 'active' : '' }}">
                                 <x-icon name="clipboard" /> Manajemen Antrian
                             </a>
                         @endif
-
                         @if (auth()->user()->hasRole('admin', 'dokter', 'petugas_rekam_medis'))
                             <a href="{{ route('rekam-medis') }}" class="nav-link {{ request()->routeIs('rekam-medis') ? 'active' : '' }}">
                                 <x-icon name="document-search" /> Rekam Medis
@@ -105,17 +96,17 @@
                 </div>
                 <div class="space-y-1">
                     @if (auth()->user()->hasRole('admin'))
-                        <a href="{{ route('data-layanan') }}" class="nav-link {{ request()->routeIs('data-layanan') ? 'active' : '' }}">
-                            <x-icon name="tag" /> Data Layanan
-                        </a>
                         <a href="{{ route('laporan') }}" class="nav-link {{ request()->routeIs('laporan') ? 'active' : '' }}">
                             <x-icon name="chart" /> Laporan
+                        </a>
+                        {{-- Menu gabungan (menggantikan Data Layanan + Manajemen Poli) --}}
+                        <a href="{{ route('layanan-poli') }}" class="nav-link {{ request()->routeIs('layanan-poli') ? 'active' : '' }}">
+                            <x-icon name="tag" /> Layanan & Poli
                         </a>
                         <a href="{{ route('manajemen-user') }}" class="nav-link {{ request()->routeIs('manajemen-user') ? 'active' : '' }}">
                             <x-icon name="users" /> Manajemen User
                         </a>
                     @endif
-
                     <a href="{{ route('pengaturan') }}" class="nav-link {{ request()->routeIs('pengaturan') ? 'active' : '' }}">
                         <x-icon name="cog" /> Pengaturan
                     </a>
@@ -124,10 +115,9 @@
         </nav>
     </aside>
 
-    {{-- ===================== KONTEN UTAMA ===================== --}}
+    {{-- Konten utama --}}
     <div class="flex-1 flex flex-col min-w-0">
 
-        {{-- Topbar --}}
         <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6">
             <h1 class="text-xl font-bold text-gray-800">{{ $title ?? 'Dashboard' }}</h1>
 
@@ -151,15 +141,9 @@
                         <p class="text-sm font-medium text-gray-700 leading-none">{{ auth()->user()->name }}</p>
                         <p class="text-xs text-gray-400 mt-1 capitalize">{{ auth()->user()->role?->label() }}</p>
                     </div>
-
                     <a href="{{ route('pengaturan') }}">
-                        <img
-                            src="https://i.pravatar.cc/40?img=47"
-                            class="w-10 h-10 rounded-full object-cover"
-                            alt="Foto profil"
-                        >
+                        <img src="https://i.pravatar.cc/40?img=47" class="w-10 h-10 rounded-full object-cover" alt="Foto profil">
                     </a>
-
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors" title="Keluar">
@@ -170,7 +154,6 @@
             </div>
         </header>
 
-        {{-- Slot: konten tiap halaman dirender di sini --}}
         <main class="flex-1 p-6">
             {{ $slot }}
         </main>

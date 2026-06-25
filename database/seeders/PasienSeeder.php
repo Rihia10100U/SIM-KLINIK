@@ -14,11 +14,11 @@ class PasienSeeder extends Seeder
 
         foreach ($namaPasien as $i => $nama) {
             Pasien::updateOrCreate(
-                ['no_rm' => 'RM-2024-' . str_pad($i + 300, 4, '0', STR_PAD_LEFT)],
+                ['no_rm' => 'RM-2024-'.str_pad($i + 300, 4, '0', STR_PAD_LEFT)],
                 [
-                    'nama'          => $nama,
+                    'nama' => $nama,
                     'jenis_kelamin' => fake()->randomElement(['L', 'P']),
-                    'no_hp'         => fake()->numerify('08##########'),
+                    'no_hp' => fake()->numerify('08##########'),
                 ]
             );
         }

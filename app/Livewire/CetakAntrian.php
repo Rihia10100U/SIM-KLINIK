@@ -15,10 +15,13 @@ class CetakAntrian extends Component
     public string $title = 'Cetak Antrian';
 
     public string $cari = '';
+
     public string $filterPoli = '';
 
     public bool $printerAktif = false;
+
     public ?int $tiketAktifId = null; // antrian yang terakhir diminta cetak (dipakai untuk markup .print-ticket)
+
     public ?string $pesanCetak = null;
 
     public function mount(): void
@@ -52,9 +55,9 @@ class CetakAntrian extends Component
         );
 
         if ($berhasil) {
-            $this->pesanCetak = 'Tiket ' . $antrian->kode_antrian . ' berhasil dicetak ke printer thermal.';
+            $this->pesanCetak = 'Tiket '.$antrian->kode_antrian.' berhasil dicetak ke printer thermal.';
         } else {
-            $this->pesanCetak = 'Printer thermal tidak merespons untuk tiket ' . $antrian->kode_antrian . ' — dialihkan ke cetak browser.';
+            $this->pesanCetak = 'Printer thermal tidak merespons untuk tiket '.$antrian->kode_antrian.' — dialihkan ke cetak browser.';
             $this->dispatch('cetak-browser');
         }
     }
@@ -65,7 +68,7 @@ class CetakAntrian extends Component
     public function cetakBrowser(int $id): void
     {
         $this->tiketAktifId = $id;
-        $this->pesanCetak   = null;
+        $this->pesanCetak = null;
         $this->dispatch('cetak-browser');
     }
 
@@ -85,8 +88,8 @@ class CetakAntrian extends Component
             : null;
 
         return view('livewire.cetak-antrian', [
-            'antrians'        => $antrians,
-            'polis'           => Poli::where('aktif', true)->orderBy('kode')->get(),
+            'antrians' => $antrians,
+            'polis' => Poli::where('aktif', true)->orderBy('kode')->get(),
             'tiketUntukCetak' => $tiketUntukCetak,
         ]);
     }

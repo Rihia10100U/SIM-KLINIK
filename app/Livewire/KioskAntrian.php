@@ -29,9 +29,9 @@ class KioskAntrian extends Component
         $urutan = AntrianPendaftaran::whereDate('tanggal', today())->count() + 1;
 
         $this->tiket = AntrianPendaftaran::create([
-            'kode_antrian' => 'REG-' . str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
-            'status'       => 'menunggu',
-            'tanggal'      => today(),
+            'kode_antrian' => 'REG-'.str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
+            'status' => 'menunggu',
+            'tanggal' => today(),
         ]);
 
         $this->cetakKeThermal();
@@ -47,7 +47,7 @@ class KioskAntrian extends Component
 
     public function ulangi(): void
     {
-        $this->tiket       = null;
+        $this->tiket = null;
         $this->pesanPrinter = null;
     }
 
