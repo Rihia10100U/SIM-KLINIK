@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Obat extends Model
 {
     protected $fillable = [
-        'kode_obat', 'nama', 'kategori', 'satuan', 'stok', 'stok_minimum', 'harga',
+        'kode_obat', 'nama', 'kategori', 'satuan', 'stok', 'stok_minimum', 'harga', 'catatan',
     ];
 
     protected $casts = [

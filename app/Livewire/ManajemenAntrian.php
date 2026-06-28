@@ -3,18 +3,20 @@
 namespace App\Livewire;
 
 use App\Models\Antrian;
+use App\Models\Notification;
 use App\Models\Pasien;
 use App\Models\Poli;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
-#[Title('Manajemen Antrian')]
+#[Title('Manajemen Antrian Poli ')]
 class ManajemenAntrian extends Component
 {
-    public string $title = 'Manajemen Antrian';
+    public string $title = 'Manajemen Antrian Poli';
 
     public string $filterPoli = '';
 
@@ -25,6 +27,8 @@ class ManajemenAntrian extends Component
     public ?int $poli_id = null;
 
     public string $cariPasien = '';
+
+    public bool $bpjs = false;
 
     protected function rules(): array
     {
@@ -41,7 +45,7 @@ class ManajemenAntrian extends Component
 
     public function bukaForm(): void
     {
-        $this->reset(['pasien_id', 'poli_id', 'cariPasien']);
+        $this->reset(['pasien_id', 'poli_id', 'cariPasien', 'bpjs']);
         $this->resetErrorBag();
         $this->showModal = true;
     }
@@ -51,16 +55,22 @@ class ManajemenAntrian extends Component
         $this->showModal = false;
     }
 
-    public function updatedCariPasien(): void
-    {
-        $this->pasien_id = null;
-    }
-
     public function pilihPasien(int $id): void
     {
         $pasien = Pasien::findOrFail($id);
         $this->pasien_id = $pasien->id;
         $this->cariPasien = $pasien->nama.' ('.$pasien->no_rm.')';
+    }
+
+    public function updatedCariPasien(): void
+    {
+        if ($this->pasien_id !== null) {
+            $pasien = Pasien::find($this->pasien_id);
+            if ($pasien && $this->cariPasien === $pasien->nama.' ('.$pasien->no_rm.')') {
+                return;
+            }
+        }
+        $this->pasien_id = null;
     }
 
     public function pasienOptions(): Collection
@@ -90,6 +100,7 @@ class ManajemenAntrian extends Component
             'poli_id' => $poli->id,
             'kode_antrian' => $poli->kode.'-'.str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
             'status' => 'menunggu',
+            'bpjs' => $this->bpjs,
             'tanggal' => today(),
         ]);
 
@@ -135,7 +146,18 @@ class ManajemenAntrian extends Component
 
     public function selesaikan(int $id): void
     {
-        Antrian::where('tanggal', today())->findOrFail($id)->update(['status' => 'selesai']);
+        $antrian = Antrian::where('tanggal', today())->with('pasien', 'poli')->findOrFail($id);
+        $antrian->update(['status' => 'selesai']);
+
+        foreach (User::whereIn('role', ['resepsionis', 'petugas_rekam_medis'])->cursor() as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'title' => 'Pemeriksaan selesai — '.$antrian->pasien->nama,
+                'message' => 'Antrian '.$antrian->kode_antrian.' di '.$antrian->poli->nama.' sudah selesai diperiksa.',
+                'type' => 'success',
+                'link' => route('rekam-medis'),
+            ]);
+        }
     }
 
     public function batalkan(int $id): void

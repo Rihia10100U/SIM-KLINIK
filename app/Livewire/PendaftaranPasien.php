@@ -4,17 +4,21 @@ namespace App\Livewire;
 
 use App\Models\Antrian;
 use App\Models\AntrianPendaftaran;
+use App\Models\Notification;
 use App\Models\Pasien;
 use App\Models\PengaturanKlinik;
 use App\Models\Poli;
+use App\Models\User;
 use App\Services\ThermalPrinter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('components.layouts.app')]
+#[Title('Registrasi Pasien')]
 class PendaftaranPasien extends Component
 {
     use WithPagination;
@@ -22,7 +26,7 @@ class PendaftaranPasien extends Component
     public string $title = 'Pendaftaran Pasien';
 
     // ========================================================================
-    // BAGIAN 1 — Patient CRUD (dari PendaftaranPasien lama)
+    // BAGIAN 1 — Patient CRUD
     // ========================================================================
 
     public string $cari = '';
@@ -46,7 +50,7 @@ class PendaftaranPasien extends Component
     public ?int $poli_id = null;
 
     // ========================================================================
-    // BAGIAN 2 — Antrian Pendaftaran (dari PanggilanPendaftaran lama)
+    // BAGIAN 2 — Antrian Pendaftaran
     // ========================================================================
 
     public bool $showModalDaftar = false;
@@ -61,7 +65,7 @@ class PendaftaranPasien extends Component
 
     public string $cariPasien = '';
 
-    // Field pasien baru di modal daftar (prefix daftar_ biar gak bentrok)
+    // Field pasien baru di modal daftar
     public string $daftar_nama = '';
 
     public string $daftar_nik = '';
@@ -75,6 +79,10 @@ class PendaftaranPasien extends Component
     public string $daftar_alamat = '';
 
     public ?int $daftar_poli_id = null;
+
+    public bool $bpjs = false;
+
+    public bool $daftar_bpjs = false;
 
     // ========================================================================
     // VALIDASI
@@ -204,6 +212,7 @@ class PendaftaranPasien extends Component
                 'poli_id' => $poli->id,
                 'kode_antrian' => $poli->kode.'-'.str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
                 'status' => 'menunggu',
+                'bpjs' => $this->bpjs,
                 'tanggal' => today(),
             ]);
 
@@ -235,12 +244,19 @@ class PendaftaranPasien extends Component
         $antrian = AntrianPendaftaran::whereDate('tanggal', today())->findOrFail($id);
         $antrian->update(['status' => 'dipanggil']);
 
+        // Pemicu suara panggil otomatis untuk panggilan pertama
+        $kodeEja = str_replace('-', ' ', $antrian->kode_antrian);
+        $kodeEja = implode('  ', str_split($kodeEja));
+        $message = "Nomor antrian, {$kodeEja}, silahkan menuju ke, loket pendaftaran";
+
+        $this->dispatch('queue-called', message: $message, _suaraKey: 'simklinik_suara_registrasi');
+
         session()->flash('sukses', "Nomor {$antrian->kode_antrian} berhasil dipanggil.");
     }
 
     public function panggilUlang(int $id): void
     {
-        $antrian = AntrianPendaftaran::whereDate('tanggal', today())->with('pasien')->findOrFail($id);
+        $antrian = AntrianPendaftaran::whereDate('tanggal', today())->findOrFail($id);
         $antrian->touch();
 
         $kodeEja = str_replace('-', ' ', $antrian->kode_antrian);
@@ -279,6 +295,12 @@ class PendaftaranPasien extends Component
 
     public function updatedCariPasien(): void
     {
+        if ($this->pasien_id !== null) {
+            $pasien = Pasien::find($this->pasien_id);
+            if ($pasien && $this->cariPasien === $pasien->nama.' ('.$pasien->no_rm.')') {
+                return;
+            }
+        }
         $this->pasien_id = null;
     }
 
@@ -289,8 +311,10 @@ class PendaftaranPasien extends Component
         }
 
         return Pasien::query()
-            ->where('nama', 'like', "%{$this->cariPasien}%")
-            ->orWhere('no_rm', 'like', "%{$this->cariPasien}%")
+            ->where(function ($query) {
+                $query->where('nama', 'like', "%{$this->cariPasien}%")
+                    ->orWhere('no_rm', 'like', "%{$this->cariPasien}%");
+            })
             ->limit(8)
             ->get();
     }
@@ -333,6 +357,7 @@ class PendaftaranPasien extends Component
                 'poli_id' => $poli->id,
                 'kode_antrian' => $poli->kode.'-'.str_pad((string) $urutan, 3, '0', STR_PAD_LEFT),
                 'status' => 'menunggu',
+                'bpjs' => $this->daftar_bpjs,
                 'tanggal' => today(),
             ]);
 
@@ -342,6 +367,17 @@ class PendaftaranPasien extends Component
             ]);
 
             $this->cetakTiketPoli($antrian, $poli, $pasien);
+
+            // Pindahkan loop notifikasi ke dalam transaksi agar variabel ter-baca dengan benar
+            foreach (User::where('role', 'dokter')->cursor() as $user) {
+                Notification::create([
+                    'user_id' => $user->id,
+                    'title' => 'Pasien baru di '.$poli->nama,
+                    'message' => $pasien->nama.' ('.$antrian->kode_antrian.') sudah mendaftar dan menunggu pemeriksaan.',
+                    'type' => 'info',
+                    'link' => route('manajemen-antrian'),
+                ]);
+            }
 
             session()->flash('sukses', $pasien->nama.' berhasil didaftarkan dan diantrikan ke '.$poli->nama
                 .'. Nomor '.$antrian->kode_antrian.' sedang dicetak — kalau tidak keluar, cetak ulang lewat menu "Cetak Antrian".');
@@ -382,7 +418,7 @@ class PendaftaranPasien extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['editId', 'nama', 'nik', 'tanggal_lahir', 'jenis_kelamin', 'no_hp', 'alamat', 'poli_id']);
+        $this->reset(['editId', 'nama', 'nik', 'tanggal_lahir', 'jenis_kelamin', 'no_hp', 'alamat', 'poli_id', 'bpjs']);
         $this->resetErrorBag();
     }
 
@@ -391,7 +427,7 @@ class PendaftaranPasien extends Component
         $this->reset([
             'pasienBaru', 'pasien_id', 'cariPasien',
             'daftar_nama', 'daftar_nik', 'daftar_tanggal_lahir', 'daftar_jenis_kelamin', 'daftar_no_hp', 'daftar_alamat',
-            'daftar_poli_id',
+            'daftar_poli_id', 'daftar_bpjs',
         ]);
         $this->resetErrorBag();
     }

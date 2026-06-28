@@ -14,17 +14,75 @@
         @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors;
     }
     .nav-link.active {
-        @apply bg-klinik-blue text-white hover:bg-klinik-blue shadow-sm shadow-klinik-blue/30;
+        @apply bg-klinik-blue-dark text-white hover:bg-blue-800 shadow-sm shadow-klinik-blue-dark/30;
     }
 
     /* Kartu putih dengan bayangan halus, dipakai di seluruh dashboard */
     .card {
-        @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+        @apply bg-white rounded-2xl border border-gray-100 shadow-sm transition-shadow duration-200;
+    }
+    .card:hover {
+        @apply shadow-md;
     }
 
     /* Badge kecil untuk status (Aktif, Menunggu, dll) */
     .badge {
         @apply text-[11px] font-medium px-2.5 py-1 rounded-full;
+    }
+
+    /* Tombol aksi utama */
+    .btn {
+        @apply text-sm font-medium px-5 py-2 rounded-full transition-colors disabled:opacity-60 inline-flex items-center gap-2;
+    }
+    .btn-primary {
+        @apply btn text-white bg-klinik-blue-dark hover:bg-blue-800;
+    }
+    .btn-success {
+        @apply btn text-white bg-klinik-green hover:bg-klinik-green-dark;
+    }
+    .btn-cancel {
+        @apply btn text-gray-500 bg-transparent hover:bg-gray-100;
+    }
+
+    /* Input form modal */
+    .input-field {
+        @apply mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40;
+    }
+
+    /* Search input */
+    .search-input {
+        @apply bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40 transition-all duration-200;
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+        animation: modalFadeIn 0.2s ease-out;
+    }
+    .modal-content {
+        animation: modalSlideUp 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes modalSlideUp {
+        from { opacity: 0; transform: translateY(20px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Tabel */
+    .table-header {
+        @apply text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-4 py-3 text-left;
+    }
+    .table-cell {
+        @apply px-4 py-3 text-sm text-gray-600;
+    }
+    .table-row {
+        @apply border-b border-gray-50 transition-colors duration-150;
+    }
+    .table-row:hover {
+        @apply bg-gray-50/80;
     }
 }
 

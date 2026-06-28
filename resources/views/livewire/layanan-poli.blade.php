@@ -3,7 +3,7 @@
     {{-- Notifikasi --}}
     @if (session('sukses'))
         <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
-            class="bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-xl px-4 py-3">
+            class="bg-klinik-blue-dark/10 border border-klinik-blue-dark/20 text-klinik-blue-dark text-sm rounded-xl px-4 py-3">
             {{ session('sukses') }}
         </div>
     @endif
@@ -22,7 +22,7 @@
         </div>
         <button
             wire:click="bukaPoliModal()"
-            class="flex items-center gap-2 bg-klinik-green text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-green-dark transition-colors whitespace-nowrap self-start"
+            class="flex items-center gap-2 bg-klinik-blue-dark text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-blue-800 transition-colors whitespace-nowrap self-start"
         >
             <x-icon name="cross" class="w-4 h-4" /> Tambah Poli
         </button>
@@ -41,7 +41,7 @@
                     <div class="flex items-center gap-4">
                         {{-- Badge kode --}}
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0
-                            {{ $p->aktif ? 'bg-sky-500 text-white' : 'bg-gray-200 text-gray-400' }}">
+                            {{ $p->aktif ? 'bg-klinik-blue-dark text-white' : 'bg-gray-200 text-gray-400' }}">
                             {{ $p->kode }}
                         </div>
 
@@ -54,7 +54,7 @@
                                     {{ $p->layanans->count() }} layanan
                                 </span>
                                 @if ($p->antrian_hari_ini > 0)
-                                    <span class="text-xs text-sky-500 font-medium">
+                                    <span class="text-xs text-klinik-blue-dark font-medium">
                                         {{ $p->antrian_hari_ini }} antrian hari ini
                                     </span>
                                 @endif
@@ -74,7 +74,7 @@
                         {{-- Edit poli --}}
                         <button
                             wire:click.stop="bukaPoliModal({{ $p->id }})"
-                            class="text-xs font-medium text-sky-500 hover:underline"
+                            class="text-xs font-medium text-klinik-blue-dark hover:underline"
                         >
                             Edit
                         </button>
@@ -118,7 +118,7 @@
                                             <td class="px-5 py-2.5 text-gray-700">{{ $l->nama }}</td>
                                             <td class="px-5 py-2.5">
                                                 <span class="text-xs px-2 py-0.5 rounded-full
-                                                    {{ $l->kategori === 'konsultasi' ? 'bg-sky-100 text-sky-600' : ($l->kategori === 'tindakan' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500') }}">
+                                                    {{ $l->kategori === 'konsultasi' ? 'bg-sky-100 text-klinik-blue-dark' : ($l->kategori === 'tindakan' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500') }}">
                                                     {{ ucfirst($l->kategori) }}
                                                 </span>
                                             </td>
@@ -137,7 +137,7 @@
                                                 <div class="flex items-center justify-end gap-3">
                                                     <button
                                                         wire:click="bukaLayananModal({{ $l->id }})"
-                                                        class="text-xs font-medium text-sky-500 hover:underline"
+                                                        class="text-xs font-medium text-klinik-blue-dark hover:underline"
                                                     >
                                                         Edit
                                                     </button>
@@ -182,8 +182,8 @@
    
     {{-- ===================== MODAL POLI ===================== --}}
     @if ($showPoliModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupPoliModal">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupPoliModal">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">{{ $editPoliId ? 'Edit Poli' : 'Tambah Poli Baru' }}</h3>
@@ -200,7 +200,7 @@
                             wire:model="poliKode"
                             maxlength="5"
                             placeholder="mis. E, F, G ..."
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                         >
                         <p class="text-[11px] text-gray-400 mt-1">Awalan nomor antrian (mis. kode "E" → E-001)</p>
                         @error('poliKode') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
@@ -212,7 +212,7 @@
                             type="text"
                             wire:model="poliNama"
                             placeholder="mis. Poli Mata"
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                         >
                         @error('poliNama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -243,8 +243,8 @@
 
     {{-- ===================== MODAL LAYANAN ===================== --}}
     @if ($showLayananModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupLayananModal">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupLayananModal">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
 
                 <div class="flex items-center justify-between mb-5">
                     <div>
@@ -268,7 +268,7 @@
                             type="text"
                             wire:model="layananNama"
                             placeholder="mis. Konsultasi Poli Umum"
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                         >
                         @error('layananNama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -278,7 +278,7 @@
                             <label class="text-xs font-medium text-gray-500">Kategori</label>
                             <select
                                 wire:model="layananKategori"
-                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                             >
                                 <option value="konsultasi">Konsultasi</option>
                                 <option value="tindakan">Tindakan</option>
@@ -291,7 +291,7 @@
                                 type="number"
                                 min="0"
                                 wire:model="layananHarga"
-                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                             >
                             @error('layananHarga') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -316,7 +316,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="simpanLayanan"
-                            class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                            class="text-sm font-medium text-white bg-klinik-blue-dark px-5 py-2 rounded-full hover:bg-blue-800 disabled:opacity-60"
                         >
                             <span wire:loading.remove wire:target="simpanLayanan">Simpan</span>
                             <span wire:loading wire:target="simpanLayanan">Menyimpan...</span>

@@ -35,6 +35,8 @@ class Farmasi extends Component
 
     public int $harga = 0;
 
+    public string $catatan = '';
+
     // ===== Modal atur stok =====
     public bool $showStokModal = false;
 
@@ -57,6 +59,7 @@ class Farmasi extends Component
             'stok' => 'required|integer|min:0',
             'stok_minimum' => 'required|integer|min:0',
             'harga' => 'required|integer|min:0',
+            'catatan' => 'nullable|string|max:2000',
         ];
     }
 
@@ -90,6 +93,7 @@ class Farmasi extends Component
         $this->stok = $obat->stok;
         $this->stok_minimum = $obat->stok_minimum;
         $this->harga = $obat->harga;
+        $this->catatan = (string) $obat->catatan;
 
         $this->showModal = true;
     }
@@ -130,7 +134,7 @@ class Farmasi extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['editId', 'nama', 'kategori', 'stok', 'harga']);
+        $this->reset(['editId', 'nama', 'kategori', 'stok', 'harga', 'catatan']);
         $this->satuan = 'Tablet';
         $this->stok_minimum = 10;
         $this->resetErrorBag();

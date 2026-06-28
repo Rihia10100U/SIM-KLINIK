@@ -28,13 +28,13 @@
                     type="text"
                     wire:model.live.debounce.400ms="cari"
                     placeholder="Cari nama atau email..."
-                    class="bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                    class="bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                 >
             </div>
 
             <button
                 wire:click="bukaForm"
-                class="flex items-center gap-2 bg-klinik-green text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-green-dark transition-colors whitespace-nowrap"
+                class="flex items-center gap-2 bg-klinik-blue-dark text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-blue-800 transition-colors whitespace-nowrap"
             >
                 <x-icon name="user-plus" class="w-4 h-4" /> Tambah User
             </button>
@@ -58,7 +58,7 @@
                         @php
                             $warnaRole = match ($u->role->value) {
                                 'admin'       => 'bg-purple-100 text-purple-600',
-                                'resepsionis' => 'bg-sky-100 text-sky-600',
+                                'resepsionis' => 'bg-sky-100 text-klinik-blue-dark',
                                 'dokter'      => 'bg-green-100 text-green-600',
                                 'kasir'       => 'bg-amber-100 text-amber-600',
                                 'apoteker'    => 'bg-pink-100 text-pink-600',
@@ -78,7 +78,7 @@
                             </td>
                             <td class="px-5 py-3">
                                 <div class="flex items-center justify-end gap-3">
-                                    <button wire:click="edit({{ $u->id }})" class="text-xs font-medium text-sky-500 hover:underline">
+                                    <button wire:click="edit({{ $u->id }})" class="text-xs font-medium text-klinik-blue-dark hover:underline">
                                         Edit
                                     </button>
                                     @if ($u->id !== auth()->id())
@@ -117,8 +117,8 @@
 
     {{-- ===================== MODAL TAMBAH / EDIT ===================== --}}
     @if ($showModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupForm">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupForm">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">
@@ -132,19 +132,19 @@
                 <form wire:submit="simpan" class="space-y-4">
                     <div>
                         <label class="text-xs font-medium text-gray-500">Nama</label>
-                        <input type="text" wire:model="nama" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                        <input type="text" wire:model="nama" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                         @error('nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-medium text-gray-500">Email</label>
-                            <input type="email" wire:model="email" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="email" wire:model="email" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             @error('email') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500">Role</label>
-                            <select wire:model="role" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <select wire:model="role" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                                 @foreach ($roles as $r)
                                     <option value="{{ $r['value'] }}">{{ $r['label'] }}</option>
                                 @endforeach
@@ -158,12 +158,12 @@
                             <label class="text-xs font-medium text-gray-500">
                                 Password {{ $editId ? '(kosongkan jika tidak diubah)' : '' }}
                             </label>
-                            <input type="password" wire:model="password" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="password" wire:model="password" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500">Konfirmasi Password</label>
-                            <input type="password" wire:model="passwordKonfirmasi" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="password" wire:model="passwordKonfirmasi" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             @error('passwordKonfirmasi') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="simpan"
-                            class="text-sm font-medium text-white bg-klinik-green px-5 py-2 rounded-full hover:bg-klinik-green-dark disabled:opacity-60"
+                            class="text-sm font-medium text-white bg-klinik-blue-dark px-5 py-2 rounded-full hover:bg-blue-800 disabled:opacity-60"
                         >
                             <span wire:loading.remove wire:target="simpan">Simpan</span>
                             <span wire:loading wire:target="simpan">Menyimpan...</span>

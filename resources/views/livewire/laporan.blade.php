@@ -18,13 +18,13 @@
                 Bulan Ini
             </button>
 
-            <input type="date" wire:model.live="dari" class="bg-gray-100 rounded-full px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+            <input type="date" wire:model.live="dari" class="bg-gray-100 rounded-full px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
             <span class="text-gray-400 text-xs">s/d</span>
-            <input type="date" wire:model.live="sampai" class="bg-gray-100 rounded-full px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+            <input type="date" wire:model.live="sampai" class="bg-gray-100 rounded-full px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
 
             <button
                 wire:click="exportCsv"
-                class="flex items-center gap-1.5 text-xs font-medium text-white bg-klinik-blue px-3 py-1.5 rounded-full hover:bg-klinik-blue-dark whitespace-nowrap"
+                class="flex items-center gap-1.5 text-xs font-medium text-white bg-klinik-blue-dark px-3 py-1.5 rounded-full hover:bg-blue-800 whitespace-nowrap"
             >
                 <x-icon name="download" class="w-3.5 h-3.5" /> Export CSV
             </button>
@@ -34,7 +34,7 @@
     {{-- ===================== RINGKASAN ===================== --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div class="card p-5">
-            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark mb-3">
                 <x-icon name="users" class="w-5 h-5" />
             </div>
             <p class="text-xl font-bold text-gray-800">{{ $ringkasan['total_kunjungan'] }}</p>
@@ -42,7 +42,7 @@
         </div>
 
         <div class="card p-5">
-            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark mb-3">
                 <x-icon name="user-plus" class="w-5 h-5" />
             </div>
             <p class="text-xl font-bold text-gray-800">{{ $ringkasan['pasien_baru'] }}</p>
@@ -50,7 +50,7 @@
         </div>
 
         <div class="card p-5">
-            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark mb-3">
                 <x-icon name="wallet" class="w-5 h-5" />
             </div>
             <p class="text-xl font-bold text-gray-800">Rp {{ number_format($ringkasan['total_pendapatan'], 0, ',', '.') }}</p>
@@ -58,7 +58,7 @@
         </div>
 
         <div class="card p-5">
-            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark mb-3">
                 <x-icon name="credit-card" class="w-5 h-5" />
             </div>
             @php
@@ -83,7 +83,7 @@
                     <div class="flex flex-col items-center justify-end h-full w-10 shrink-0">
                         <span class="text-xs font-semibold text-gray-600 mb-1">{{ $h['jumlah'] }}</span>
                         <div
-                            class="w-7 rounded-t-md {{ $h['jumlah'] === $maxKunjungan ? 'bg-sky-500' : 'bg-sky-100' }}"
+                            class="w-7 rounded-t-md {{ $h['jumlah'] === $maxKunjungan ? 'bg-klinik-blue-dark' : 'bg-sky-100' }}"
                             style="height: {{ $h['jumlah'] / $maxKunjungan * 100 }}%"
                         ></div>
                         <span class="text-[10px] text-gray-400 mt-2 whitespace-nowrap">{{ $h['label'] }}</span>

@@ -13,6 +13,7 @@ composer test           # config:clear + artisan test
 - PHP 8.3+, MySQL (`sim_klinik`), node via Vite
 - `.env` sets Indonesian locale/timezone: `APP_LOCALE=id`, `TIMEZONE=Asia/Jakarta`
 - `.npmrc` has `ignore-scripts=true` — add `--ignore-scripts` to `npm install` calls
+- Lint: `./vendor/bin/pint`
 
 ## Architecture
 
@@ -21,6 +22,7 @@ composer test           # config:clear + artisan test
 - **5 roles** (enum `App\Enums\Role`): `admin`, `resepsionis`, `dokter`, `petugas_rekam_medis`, `apoteker`
 - Custom `role` middleware (`EnsureRole`) registered in `bootstrap/app.php`
 - Public kiosk routes (no auth) for patient self-service under `/kiosk/*`
+- Legacy components (`PanggilanPendaftaran`, `DataLayanan`, `KioskTunggu`) still exist in code but routes redirect elsewhere — do not create new routes pointing to them.
 
 ## Key packages
 
@@ -33,7 +35,7 @@ composer test           # config:clear + artisan test
 
 Config in `config/printer.php`, driven by env:
 ```
-PRINTER_CONNECTION=windows    # windows | network | usb | none
+PRINTER_CONNECTION=windows    # windows | network | usb | com | none
 PRINTER_WINDOWS_NAME=POS-58
 ```
 Service class: `App\Services\ThermalPrinter`. Returns `false` on failure (never throws) so kiosk flow isn't blocked.
@@ -63,4 +65,5 @@ Service class: `App\Services\ThermalPrinter`. Returns `false` on failure (never 
 - New sidebar links use `<x-icon name="..." />` — available icons defined in `resources/views/components/icon.blade.php`
 - Reusable CSS classes in `resources/css/app.css`: `.nav-link`, `.card`, `.badge`
 - `.print-ticket` class + `@media print` block for thermal ticket printing via `window.print()`
-- Tailwind theme colors in `tailwind.config.js`: `klinik-bg`, `klinik-blue`. However, `klinik-green` and `klinik-green-dark` are used throughout views but **not defined** in the config — adding them to `tailwind.config.js` colors may be needed for correct rendering.
+- Tailwind colors in `tailwind.config.js`: `klinik-bg`, `klinik-blue-dark`, `klinik-green`, `klinik-green-dark`
+- **Known issue**: `kiosk.blade.php` loads `js/antrian-speaker.js` but that file does not exist; only `public/js/call-queue.js` does. Fix the `<script>` src if adding speaker functionality.

@@ -23,7 +23,7 @@ class KioskTungguPoli extends Component
             ->orderByDesc('updated_at')
             ->first();
 
-        $this->lastSignature = $terakhir ? $terakhir->id . '-' . $terakhir->updated_at->timestamp : '';
+        $this->lastSignature = $terakhir ? $terakhir->id.'-'.$terakhir->updated_at->timestamp : '';
     }
 
     public function render()
@@ -38,7 +38,7 @@ class KioskTungguPoli extends Component
         $terbaru = $dipanggil->first();
 
         // LOGIKA DETEKSI ANTRIAN BARU / DIPANGGIL ULANG:
-        $currentSignature = $terbaru ? $terbaru->id . '-' . $terbaru->updated_at->timestamp : '';
+        $currentSignature = $terbaru ? $terbaru->id.'-'.$terbaru->updated_at->timestamp : '';
         if ($terbaru && $this->lastSignature !== $currentSignature) {
 
             $kodeEja = str_replace('-', ' ', $terbaru->kode_antrian);

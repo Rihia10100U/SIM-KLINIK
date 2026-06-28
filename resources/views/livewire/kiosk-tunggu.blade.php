@@ -36,7 +36,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
                 @foreach ($poliDipanggil as $a)
                     <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-6 text-center" wire:key="poli-{{ $a->id }}">
-                        <p class="text-4xl font-extrabold text-sky-600">{{ $a->kode_antrian }}</p>
+                        <p class="text-4xl font-extrabold text-klinik-blue-dark">{{ $a->kode_antrian }}</p>
                         <p class="text-sm text-gray-500 mt-2">{{ $a->poli->nama }}</p>
                     </div>
                 @endforeach

@@ -17,11 +17,14 @@ class Transaksi extends Model
         'deskripsi',
         'jumlah',
         'metode',
-        'status',       // ← ini yang kurang, penyebab resep selalu tersimpan sebagai 'lunas'
+        'status',
+        'bpjs',
+        'catatan',
         'tanggal',
     ];
 
     protected $casts = [
+        'bpjs' => 'boolean',
         'tanggal' => 'date',
     ];
 

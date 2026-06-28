@@ -8,7 +8,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <select wire:model.live="filterPoli" class="bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+            <select wire:model.live="filterPoli" class="bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                 <option value="">Semua Poli</option>
                 @foreach ($polis as $poli)
                     <option value="{{ $poli->id }}">{{ $poli->nama }}</option>
@@ -21,7 +21,7 @@
                     type="text"
                     wire:model.live.debounce.400ms="cari"
                     placeholder="Cari kode/nama pasien..."
-                    class="bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                    class="bg-gray-100 rounded-full pl-9 pr-4 py-2 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                 >
             </div>
         </div>
@@ -35,7 +35,7 @@
     @endif
 
     @if (! $printerAktif)
-        <div class="bg-sky-50 border border-sky-200 text-sky-700 text-sm rounded-xl px-4 py-3">
+        <div class="bg-sky-50 border border-sky-200 text-klinik-blue-dark text-sm rounded-xl px-4 py-3">
             Printer thermal belum diaktifkan (<code class="bg-white/60 px-1 rounded">PRINTER_CONNECTION=none</code> di .env) — semua tombol cetak di bawah akan memakai dialog print browser.
         </div>
     @endif
@@ -59,14 +59,14 @@
                         @php
                             $badgeStatus = match ($a->status) {
                                 'menunggu'  => 'bg-amber-100 text-amber-600',
-                                'dipanggil' => 'bg-sky-100 text-sky-600',
+                                'dipanggil' => 'bg-sky-100 text-klinik-blue-dark',
                                 'selesai'   => 'bg-green-100 text-green-600',
                                 default     => 'bg-gray-100 text-gray-500',
                             };
                         @endphp
                         <tr class="hover:bg-gray-50/60" wire:key="cetak-{{ $a->id }}">
                             <td class="px-5 py-3 text-gray-500 whitespace-nowrap">{{ $a->created_at->format('H:i') }}</td>
-                            <td class="px-5 py-3 font-bold text-sky-500 whitespace-nowrap">{{ $a->kode_antrian }}</td>
+                            <td class="px-5 py-3 font-bold text-klinik-blue-dark whitespace-nowrap">{{ $a->kode_antrian }}</td>
                             <td class="px-5 py-3 text-gray-700">{{ $a->pasien->nama }}</td>
                             <td class="px-5 py-3 text-gray-500 whitespace-nowrap">{{ $a->poli->nama }}</td>
                             <td class="px-5 py-3">
@@ -85,7 +85,7 @@
                                             <span wire:loading wire:target="cetak({{ $a->id }})">...</span>
                                         </button>
                                     @endif
-                                    <button wire:click="cetakBrowser({{ $a->id }})" class="text-xs font-medium text-sky-500 hover:underline">
+                                    <button wire:click="cetakBrowser({{ $a->id }})" class="text-xs font-medium text-klinik-blue-dark hover:underline">
                                         Cetak via Browser
                                     </button>
                                 </div>

@@ -22,13 +22,13 @@
                     type="text"
                     wire:model.live.debounce.400ms="cari"
                     placeholder="Cari nama atau kode obat..."
-                    class="w-64 pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-full transition-all duration-300 outline-none hover:border-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+                    class="search-input"
                 >
             </div>
 
             <button
                 wire:click="bukaForm"
-                class="flex items-center gap-2 bg-klinik-blue text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-blue-dark transition-colors whitespace-nowrap"
+                class="flex items-center gap-2 bg-klinik-blue-dark text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-blue-800 transition-colors whitespace-nowrap"
             >
                 <x-icon name="pill" class="w-4 h-4" /> Tambah Obat
             </button>
@@ -47,6 +47,7 @@
                         <th class="px-5 py-3 font-medium">Stok</th>
                         <th class="px-5 py-3 font-medium">Status</th>
                         <th class="px-5 py-3 font-medium">Harga</th>
+                        <th class="px-5 py-3 font-medium">Catatan</th>
                         <th class="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -66,7 +67,7 @@
                             };
                         @endphp
                         <tr class="hover:bg-gray-50/60" wire:key="obat-{{ $o->id }}">
-                            <td class="px-5 py-3 font-medium text-sky-500 whitespace-nowrap">{{ $o->kode_obat }}</td>
+                            <td class="px-5 py-3 font-medium text-klinik-blue-dark whitespace-nowrap">{{ $o->kode_obat }}</td>
                             <td class="px-5 py-3 text-gray-700">{{ $o->nama }}</td>
                             <td class="px-5 py-3 text-gray-500">{{ $o->kategori ?: '-' }}</td>
                             <td class="px-5 py-3 text-gray-600 whitespace-nowrap">{{ $o->stok }} {{ $o->satuan }}</td>
@@ -76,12 +77,15 @@
                             <td class="px-5 py-3 text-gray-500 whitespace-nowrap">
                                 Rp {{ number_format($o->harga, 0, ',', '.') }}
                             </td>
+                            <td class="px-5 py-3 text-gray-500 max-w-[200px] truncate" title="{{ $o->catatan }}">
+                                {{ $o->catatan ?: '-' }}
+                            </td>
                             <td class="px-5 py-3">
                                 <div class="flex items-center justify-end gap-3">
                                     <button wire:click="bukaStokForm({{ $o->id }})" class="text-xs font-medium text-klinik-green hover:underline">
                                         Atur Stok
                                     </button>
-                                    <button wire:click="edit({{ $o->id }})" class="text-xs font-medium text-sky-500 hover:underline">
+                                    <button wire:click="edit({{ $o->id }})" class="text-xs font-medium text-klinik-blue-dark hover:underline">
                                         Edit
                                     </button>
                                     <button
@@ -96,7 +100,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-10 text-center text-gray-400 text-sm">
+                            <td colspan="8" class="px-5 py-10 text-center text-gray-400 text-sm">
                                 @if ($cari)
                                     Tidak ada obat yang cocok dengan pencarian "{{ $cari }}".
                                 @else
@@ -118,8 +122,8 @@
 
     {{-- ===================== MODAL TAMBAH / EDIT OBAT ===================== --}}
     @if ($showModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupForm">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupForm">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">
@@ -133,18 +137,18 @@
                 <form wire:submit="simpan" class="space-y-4">
                     <div>
                         <label class="text-xs font-medium text-gray-500">Nama Obat</label>
-                        <input type="text" wire:model="nama" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                        <input type="text" wire:model="nama" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                         @error('nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-medium text-gray-500">Kategori</label>
-                            <input type="text" wire:model="kategori" placeholder="mis. Antibiotik" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="text" wire:model="kategori" placeholder="mis. Antibiotik" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500">Satuan</label>
-                            <select wire:model="satuan" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <select wire:model="satuan" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                                 <option value="Tablet">Tablet</option>
                                 <option value="Kapsul">Kapsul</option>
                                 <option value="Botol">Botol</option>
@@ -159,18 +163,24 @@
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="text-xs font-medium text-gray-500">Stok Awal</label>
-                            <input type="number" min="0" wire:model="stok" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="number" min="0" wire:model="stok" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             @error('stok') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500">Stok Minimum</label>
-                            <input type="number" min="0" wire:model="stok_minimum" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="number" min="0" wire:model="stok_minimum" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500">Harga (Rp)</label>
-                            <input type="number" min="0" wire:model="harga" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="number" min="0" wire:model="harga" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             @error('harga') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Catatan</label>
+                        <textarea wire:model="catatan" rows="3" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40" placeholder="Catatan manual tentang obat ini..."></textarea>
+                        @error('catatan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     @if ($editId)
@@ -187,7 +197,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="simpan"
-                            class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                            class="text-sm font-medium text-white bg-klinik-blue-dark px-5 py-2 rounded-full hover:bg-blue-800 disabled:opacity-60"
                         >
                             <span wire:loading.remove wire:target="simpan">Simpan</span>
                             <span wire:loading wire:target="simpan">Menyimpan...</span>
@@ -200,8 +210,8 @@
 
     {{-- ===================== MODAL ATUR STOK ===================== --}}
     @if ($showStokModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupStokForm">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupStokForm">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
 
                 <div class="flex items-center justify-between mb-1">
                     <h3 class="font-bold text-gray-800">Atur Stok</h3>
@@ -235,7 +245,7 @@
                             type="number"
                             min="1"
                             wire:model="jumlahPerubahan"
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                         >
                         @error('jumlahPerubahan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -248,7 +258,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="simpanStok"
-                            class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:opacity-90 disabled:opacity-60"
+                            class="btn-primary"
                         >
                             <span wire:loading.remove wire:target="simpanStok">Simpan</span>
                             <span wire:loading wire:target="simpanStok">Menyimpan...</span>

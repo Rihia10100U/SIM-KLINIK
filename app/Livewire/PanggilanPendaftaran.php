@@ -104,6 +104,12 @@ class PanggilanPendaftaran extends Component
 
     public function updatedCariPasien(): void
     {
+        if ($this->pasien_id !== null) {
+            $pasien = Pasien::find($this->pasien_id);
+            if ($pasien && $this->cariPasien === $pasien->nama.' ('.$pasien->no_rm.')') {
+                return;
+            }
+        }
         $this->pasien_id = null;
     }
 

@@ -31,7 +31,7 @@
                         <span class="text-lg font-bold text-gray-700">{{ $a->kode_antrian }}</span>
                         <button
                             wire:click="panggil({{ $a->id }})"
-                            class="text-xs font-medium text-white bg-sky-500 px-4 py-1.5 rounded-full hover:bg-sky-600"
+                            class="text-xs font-medium text-white bg-klinik-blue-dark px-4 py-1.5 rounded-full hover:bg-blue-800"
                         >
                             Panggil
                         </button>
@@ -46,9 +46,9 @@
         <div class="card p-4">
             <div class="flex items-center justify-between mb-4 px-1">
                 <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-sky-500"></span> Dipanggil — Siap Didaftarkan
+                    <span class="w-2 h-2 rounded-full bg-klinik-blue-dark"></span> Dipanggil — Siap Didaftarkan
                 </h3>
-                <span class="badge bg-sky-100 text-sky-600">{{ $antrianDipanggil->count() }}</span>
+                <span class="badge bg-sky-100 text-klinik-blue-dark">{{ $antrianDipanggil->count() }}</span>
             </div>
 
             <div class="space-y-3 max-h-[28rem] overflow-y-auto pr-1">
@@ -71,8 +71,8 @@
 
     {{-- ===================== MODAL DAFTARKAN ===================== --}}
     @if ($showModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto" wire:click.self="tutupForm">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 my-8">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto" wire:click.self="tutupForm">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 my-8">
 
                 <div class="flex items-center justify-between mb-1">
                     <h3 class="font-bold text-gray-800">Daftarkan Pasien</h3>
@@ -111,7 +111,7 @@
                                 wire:model.live.debounce.300ms="cariPasien"
                                 placeholder="Ketik nama atau No. RM..."
                                 autocomplete="off"
-                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                             >
                             @error('pasien_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 
@@ -136,18 +136,18 @@
                         {{-- ===== FORM PASIEN BARU ===== --}}
                         <div>
                             <label class="text-xs font-medium text-gray-500">Nama Lengkap</label>
-                            <input type="text" wire:model="nama" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <input type="text" wire:model="nama" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             @error('nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-xs font-medium text-gray-500">NIK</label>
-                                <input type="text" wire:model="nik" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                                <input type="text" wire:model="nik" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             </div>
                             <div>
                                 <label class="text-xs font-medium text-gray-500">Jenis Kelamin</label>
-                                <select wire:model="jenis_kelamin" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                                <select wire:model="jenis_kelamin" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                                     <option value="">Pilih</option>
                                     <option value="L">Laki-laki</option>
                                     <option value="P">Perempuan</option>
@@ -158,24 +158,24 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-xs font-medium text-gray-500">Tanggal Lahir</label>
-                                <input type="date" wire:model="tanggal_lahir" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                                <input type="date" wire:model="tanggal_lahir" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             </div>
                             <div>
                                 <label class="text-xs font-medium text-gray-500">No. HP</label>
-                                <input type="text" wire:model="no_hp" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                                <input type="text" wire:model="no_hp" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             </div>
                         </div>
 
                         <div>
                             <label class="text-xs font-medium text-gray-500">Alamat</label>
-                            <textarea wire:model="alamat" rows="2" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"></textarea>
+                            <textarea wire:model="alamat" rows="2" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"></textarea>
                         </div>
                     @endif
 
                     {{-- Pilih poli --}}
                     <div>
                         <label class="text-xs font-medium text-gray-500">Poli Tujuan</label>
-                        <select wire:model="poli_id" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                        <select wire:model="poli_id" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                             <option value="">Pilih poli</option>
                             @foreach ($polis as $poli)
                                 <option value="{{ $poli->id }}">{{ $poli->nama }}</option>

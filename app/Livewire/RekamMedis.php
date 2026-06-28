@@ -13,6 +13,7 @@ use App\Models\TransaksiItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -21,6 +22,7 @@ class RekamMedis extends Component
 {
     use WithPagination;
 
+    #[Title('Rekam Medis')]
     public string $title = 'Rekam Medis';
 
     public string $cari = '';
@@ -52,6 +54,9 @@ class RekamMedis extends Component
     public string $catatan = '';
 
     public string $tanggal_periksa = '';
+
+    // ===== BPJS =====
+    public bool $bpjs = false;
 
     // ===== LAYANAN: satu pilihan (radio button) =====
     public ?int $selectedLayananId = null; // ID layanan yang dipilih
@@ -92,6 +97,12 @@ class RekamMedis extends Component
 
     public function updatedCariPasien(): void
     {
+        if ($this->pasien_id !== null) {
+            $pasien = Pasien::find($this->pasien_id);
+            if ($pasien && $this->cariPasien === $pasien->nama.' ('.$pasien->no_rm.')') {
+                return;
+            }
+        }
         $this->pasien_id = null;
     }
 
@@ -114,6 +125,16 @@ class RekamMedis extends Component
         $pasien = Pasien::findOrFail($id);
         $this->pasien_id = $pasien->id;
         $this->cariPasien = $pasien->nama.' ('.$pasien->no_rm.')';
+
+        if (! $this->antrianId) {
+            $lastAntrian = Antrian::where('pasien_id', $id)
+                ->whereNotNull('poli_id')
+                ->latest()
+                ->first();
+            if ($lastAntrian) {
+                $this->poli_id = $lastAntrian->poli_id;
+            }
+        }
     }
 
     // ===== OBAT (resep) =====
@@ -144,6 +165,7 @@ class RekamMedis extends Component
             'nama' => $obat->nama,
             'qty' => 1,
             'harga_satuan' => $obat->harga,
+            'catatan' => '',
         ];
 
         $this->cariObat = '';
@@ -191,6 +213,7 @@ class RekamMedis extends Component
         $this->pasien_id = $antrian->pasien_id;
         $this->namaPasienTerpilih = $antrian->pasien->nama;
         $this->poli_id = $antrian->poli_id;
+        $this->bpjs = $antrian->bpjs;
         $this->tanggal_periksa = today()->toDateString();
 
         // Pilih otomatis layanan konsultasi aktif untuk poli ini
@@ -267,75 +290,83 @@ class RekamMedis extends Component
                 RekamMedisModel::create($rmData);
             }
 
-            // 2. Buat tagihan gabungan kalau dari antrian aktif
-            if ($this->antrianId) {
-                $antrian = Antrian::with('poli')->findOrFail($this->antrianId);
+            // 2. Buat tagihan gabungan kalau ada layanan/resep (antrian aktif atau catat manual)
+            $semuaItem = [];
 
-                $semuaItem = [];
-
-                // Layanan terpilih (satu, dari radio button)
-                if ($this->selectedLayananId) {
-                    $l = Layanan::find($this->selectedLayananId);
-                    if ($l) {
-                        $semuaItem[] = [
-                            'obat_id' => null,
-                            'nama_item' => $l->nama,
-                            'jenis' => $l->kategori,
-                            'qty' => 1,
-                            'harga_satuan' => $l->harga,
-                            'subtotal' => $l->harga,
-                        ];
-                    }
-                }
-
-                // Obat resep
-                foreach ($this->resep as $i) {
-                    $qty = (int) ($i['qty'] ?? 1);
-                    $harga = (int) ($i['harga_satuan'] ?? 0);
-
+            if ($this->selectedLayananId) {
+                $l = Layanan::find($this->selectedLayananId);
+                if ($l) {
                     $semuaItem[] = [
-                        'obat_id' => $i['obat_id'],
-                        'nama_item' => $i['nama'],
-                        'jenis' => 'obat',
-                        'qty' => $qty,
-                        'harga_satuan' => $harga,
-                        'subtotal' => $qty * $harga,
+                        'obat_id' => null,
+                        'nama_item' => $l->nama,
+                        'jenis' => $l->kategori,
+                        'qty' => 1,
+                        'harga_satuan' => $l->harga,
+                        'subtotal' => $l->harga,
                     ];
                 }
+            }
 
-                if (! empty($semuaItem)) {
-                    $total = collect($semuaItem)->sum('subtotal');
-
-                    $transaksi = Transaksi::create([
-                        'pasien_id' => $pasienId,
-                        'antrian_id' => $antrian->id,
-                        'deskripsi' => 'Tagihan pemeriksaan '.($antrian->poli->nama ?? '-'),
-                        'jumlah' => $total,
-                        'metode' => '-',
-                        'status' => 'menunggu_pembayaran',
-                        'tanggal' => today(),
-                    ]);
-
-                    foreach ($semuaItem as $item) {
-                        TransaksiItem::create([
-                            'transaksi_id' => $transaksi->id,
-                            'obat_id' => $item['obat_id'],
-                            'nama_item' => $item['nama_item'],
-                            'jenis' => $item['jenis'],
-                            'qty' => $item['qty'],
-                            'harga_satuan' => $item['harga_satuan'],
-                            'subtotal' => $item['subtotal'],
-                        ]);
-                    }
+            foreach ($this->resep as $i) {
+                $qty = (int) ($i['qty'] ?? 1);
+                $harga = (int) ($i['harga_satuan'] ?? 0);
+                $catatan = trim($i['catatan'] ?? '');
+                $namaItem = $i['nama'];
+                if ($catatan) {
+                    $namaItem .= ' ('.$catatan.')';
                 }
 
-                $antrian->update(['status' => 'selesai']);
+                $semuaItem[] = [
+                    'obat_id' => $i['obat_id'],
+                    'nama_item' => $namaItem,
+                    'jenis' => 'obat',
+                    'qty' => $qty,
+                    'harga_satuan' => $harga,
+                    'subtotal' => $qty * $harga,
+                ];
+            }
+
+            if (! empty($semuaItem)) {
+                $total = collect($semuaItem)->sum('subtotal');
+
+                $deskripsi = 'Tagihan pemeriksaan';
+                if ($this->antrianId) {
+                    $antrian = Antrian::with('poli')->findOrFail($this->antrianId);
+                    $deskripsi .= ' '.($antrian->poli->nama ?? '-');
+                }
+
+                $transaksi = Transaksi::create([
+                    'pasien_id' => $pasienId,
+                    'antrian_id' => $this->antrianId,
+                    'deskripsi' => $deskripsi,
+                    'jumlah' => $total,
+                    'metode' => '-',
+                    'status' => 'menunggu_pembayaran',
+                    'bpjs' => $this->bpjs,
+                    'tanggal' => today(),
+                ]);
+
+                foreach ($semuaItem as $item) {
+                    TransaksiItem::create([
+                        'transaksi_id' => $transaksi->id,
+                        'obat_id' => $item['obat_id'],
+                        'nama_item' => $item['nama_item'],
+                        'jenis' => $item['jenis'],
+                        'qty' => $item['qty'],
+                        'harga_satuan' => $item['harga_satuan'],
+                        'subtotal' => $item['subtotal'],
+                    ]);
+                }
+
+                if ($this->antrianId) {
+                    $antrian->update(['status' => 'selesai']);
+                }
             }
         });
 
         $pesan = $this->editId
             ? 'Rekam medis berhasil diperbarui.'
-            : ($this->antrianId
+            : (($this->antrianId || $this->totalTagihan() > 0)
                 ? 'Pemeriksaan selesai. Tagihan Rp '.number_format($this->totalTagihan(), 0, ',', '.').' dikirim ke Farmasi & Pembayaran.'
                 : 'Rekam medis berhasil disimpan.');
 
@@ -354,7 +385,7 @@ class RekamMedis extends Component
         $this->reset([
             'editId', 'antrianId', 'pasien_id', 'namaPasienTerpilih', 'cariPasien',
             'poli_id', 'dokter', 'keluhan', 'diagnosis', 'tindakan', 'catatan',
-            'tanggal_periksa', 'selectedLayananId', 'resep', 'cariObat',
+            'tanggal_periksa', 'bpjs', 'selectedLayananId', 'resep', 'cariObat',
         ]);
         $this->resetErrorBag();
     }

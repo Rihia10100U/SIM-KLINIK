@@ -9,8 +9,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'klinik-bg': '#F8FAFC',   /* Ganti dengan kode warna latar belakang asli klinikmu */
-        'klinik-blue': '#0284C7', /* Ganti dengan kode warna biru utama klinikmu */
+        'klinik-bg': '#F8FAFC',
+        'klinik-blue-dark': '#0369A1',
+        'klinik-green': '#16A34A',
+        'klinik-green-dark': '#15803D',
       },
     },
   },

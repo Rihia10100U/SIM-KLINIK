@@ -13,6 +13,7 @@ use App\Livewire\LayananPoli;
 use App\Livewire\ManajemenAntrian;
 use App\Livewire\ManajemenUser;
 use App\Livewire\MediaInformasi;
+use App\Livewire\Notifications;
 use App\Livewire\PendaftaranPasien;
 use App\Livewire\Pengaturan;
 use App\Livewire\RekamMedis;
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard'));
 
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/notifications', Notifications::class)->name('notifications');
     Route::get('/pengaturan', Pengaturan::class)->name('pengaturan');
 
     Route::middleware('role:admin,resepsionis')->group(function () {

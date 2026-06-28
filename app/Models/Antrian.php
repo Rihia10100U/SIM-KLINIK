@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Antrian extends Model
 {
     protected $fillable = [
-        'pasien_id', 'poli_id', 'kode_antrian', 'status', 'tanggal',
+        'pasien_id', 'poli_id', 'kode_antrian', 'status', 'bpjs', 'tanggal',
     ];
 
     protected $casts = [
+        'bpjs' => 'boolean',
         'tanggal' => 'date',
     ];
 

@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
+#[Title('Pengaturan')]
 class Pengaturan extends Component
 {
     public string $title = 'Pengaturan';
@@ -152,7 +154,14 @@ class Pengaturan extends Component
         if ($berhasil) {
             session()->flash('sukses_printer', 'Tes cetak berhasil dikirim ke printer.');
         } else {
-            session()->flash('gagal_printer', 'Gagal mencetak — cek apakah printer menyala dan pengaturan koneksi di .env sudah benar.');
+            $koneksi = config('printer.connection');
+            $detail = match ($koneksi) {
+                'windows' => 'Pastikan printer menyala dan nama printer share di .env (PRINTER_WINDOWS_NAME) sudah benar.',
+                'com' => 'Pastikan port COM (PRINTER_COM_PORT) sudah benar. Cek di Device Manager → Ports (COM & LPT).',
+                'network' => 'Pastikan alamat IP (PRINTER_HOST) dan port (PRINTER_PORT) sudah benar.',
+                default => 'Cek pengaturan koneksi di .env.',
+            };
+            session()->flash('gagal_printer', "Gagal mencetak — $detail");
         }
     }
 

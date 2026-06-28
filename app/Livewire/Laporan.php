@@ -9,9 +9,11 @@ use App\Models\TransaksiItem;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
+#[Title('Laporan')]
 class Laporan extends Component
 {
     public string $title = 'Laporan';

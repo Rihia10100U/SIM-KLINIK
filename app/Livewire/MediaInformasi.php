@@ -3,12 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\MediaInformasi as MediaModel;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
 
 #[Layout('components.layouts.app')]
+#[Title('Media Informasi')]
 class MediaInformasi extends Component
 {
     use WithFileUploads;
@@ -41,7 +43,7 @@ class MediaInformasi extends Component
             'video.max' => 'Ukuran video maksimal 200MB.',
         ]);
 
-        $fileName = time() . '_' . $this->video->getClientOriginalName();
+        $fileName = time().'_'.$this->video->getClientOriginalName();
         $filePath = $this->video->storeAs('media', $fileName, 'public');
 
         MediaModel::create([

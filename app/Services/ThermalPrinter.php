@@ -17,18 +17,19 @@ class ThermalPrinter
     {
         return $this->cetak(function (Printer $printer) use ($kodeAntrian, $namaKlinik, $waktu) {
             $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->setEmphasis(true);
             $printer->text($namaKlinik."\n");
-            $printer->text("Nomor Antrian Pendaftaran\n");
+            $printer->setEmphasis(false);
+            $printer->text($waktu->format('d-m-Y H:i')."\n");
             $printer->feed();
 
-            $printer->setTextSize(4, 4);
+            $printer->setTextSize(2, 2);
             $printer->setEmphasis(true);
             $printer->text($kodeAntrian."\n");
             $printer->setEmphasis(false);
             $printer->setTextSize(1, 1);
 
             $printer->feed();
-            $printer->text($waktu->format('d-m-Y H:i')."\n");
             $printer->text("Silakan tunggu nomor Anda dipanggil\n");
         });
     }
@@ -45,11 +46,13 @@ class ThermalPrinter
     ): bool {
         return $this->cetak(function (Printer $printer) use ($kodeAntrian, $namaPoli, $namaPasien, $namaKlinik, $waktu) {
             $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->setEmphasis(true);
             $printer->text($namaKlinik."\n");
-            $printer->text("Nomor Antrian Poli\n");
+            $printer->setEmphasis(false);
+            $printer->text($waktu->format('d-m-Y H:i')."\n");
             $printer->feed();
 
-            $printer->setTextSize(4, 4);
+            $printer->setTextSize(2, 2);
             $printer->setEmphasis(true);
             $printer->text($kodeAntrian."\n");
             $printer->setEmphasis(false);
@@ -58,7 +61,6 @@ class ThermalPrinter
             $printer->feed();
             $printer->text($namaPoli."\n");
             $printer->text($namaPasien."\n");
-            $printer->text($waktu->format('d-m-Y H:i')."\n");
             $printer->text("Silakan tunggu di area poli\n");
         });
     }
@@ -72,9 +74,8 @@ class ThermalPrinter
     }
 
     /**
-     * Pembungkus umum: buka koneksi, jalankan isi struk lewat callback, lalu potong & tutup.
-     * Tidak melempar exception ke pemanggil — return false kalau printer gagal dihubungi,
-     * supaya alur kiosk/halaman tetap jalan walau printer mati/offline.
+     * Pembungkus umum: buka koneksi, inisialisasi printer, jalankan isi struk lewat callback,
+     * lalu potong & tutup.
      */
     private function cetak(callable $isiStruk): bool
     {
@@ -87,9 +88,12 @@ class ThermalPrinter
         try {
             $printer = new Printer($connector);
 
+            $printer->initialize();
+            $this->inisialisasiCharset($printer);
+
             $isiStruk($printer);
 
-            $printer->feed(2);
+            $printer->feed();
             $printer->cut();
             $printer->close();
 
@@ -101,12 +105,30 @@ class ThermalPrinter
         }
     }
 
+    /**
+     * Setel code page untuk karakter Indonesia (Latin1/CP850).
+     */
+    private function inisialisasiCharset(Printer $printer): void
+    {
+        $printer->selectCharacterTable(2);
+    }
+
     private function buatKoneksi(): mixed
     {
         return match (config('printer.connection')) {
-            'network' => new NetworkPrintConnector(config('printer.host'), config('printer.port')),
-            'windows' => new WindowsPrintConnector(config('printer.windows_name')),
-            'usb' => new FilePrintConnector(config('printer.usb_path')),
+            'network' => new NetworkPrintConnector(
+                config('printer.host'),
+                config('printer.port'),
+            ),
+            'windows' => new WindowsPrintConnector(
+                config('printer.windows_name'),
+            ),
+            'com' => new FilePrintConnector(
+                '\\\\.\\'.config('printer.com_port'),
+            ),
+            'usb' => new FilePrintConnector(
+                config('printer.usb_path'),
+            ),
             default => null,
         };
     }

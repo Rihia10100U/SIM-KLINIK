@@ -11,8 +11,8 @@
 
     <div class="w-full max-w-sm">
         <div class="flex flex-col items-center mb-8">
-            <div class="w-14 h-14 rounded-2xl bg-klinik-green/10 flex items-center justify-center text-klinik-green mb-3">
-                <x-icon name="cross" class="w-8 h-8" />
+            <div class="flex items-center justify-center mb-3">
+                <img src="{{ asset('img/logo_sim-klinik.png') }}" alt="SIM-KLINIK" class="w-14 h-14 object-contain">
             </div>
             <h1 class="font-bold text-gray-800 text-lg">SIM-KLINIK</h1>
             <p class="text-xs text-gray-400">Sistem Informasi Klinik</p>

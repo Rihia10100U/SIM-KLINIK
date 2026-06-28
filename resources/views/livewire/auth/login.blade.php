@@ -10,7 +10,7 @@
                 wire:model="email"
                 autofocus
                 autocomplete="username"
-                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
             >
             @error('email') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>
@@ -21,7 +21,7 @@
                 type="password"
                 wire:model="password"
                 autocomplete="current-password"
-                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
             >
             @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>
@@ -35,7 +35,7 @@
             type="submit"
             wire:loading.attr="disabled"
             wire:target="login"
-            class="w-full text-sm font-medium text-white bg-klinik-blue py-2.5 rounded-lg hover:bg-klinik-blue-dark disabled:opacity-60"
+            class="w-full text-sm font-medium text-white bg-klinik-blue-dark py-2.5 rounded-lg hover:bg-blue-800 disabled:opacity-60"
         >
             <span wire:loading.remove wire:target="login">Masuk</span>
             <span wire:loading wire:target="login">Memproses...</span>

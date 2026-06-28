@@ -13,7 +13,7 @@
                 wire:click="ambilNomor"
                 wire:loading.attr="disabled"
                 wire:target="ambilNomor"
-                class="w-full bg-klinik-green text-white font-semibold py-5 rounded-xl text-lg hover:bg-klinik-green-dark disabled:opacity-60"
+                class="w-full bg-klinik-blue-dark text-white font-semibold py-5 rounded-xl text-lg hover:bg-blue-800 disabled:opacity-60"
             >
                 <span wire:loading.remove wire:target="ambilNomor">Ambil Nomor Antrian</span>
                 <span wire:loading wire:target="ambilNomor">Memproses...</span>
@@ -23,7 +23,7 @@
         {{-- ===================== TIKET (TAMPILAN LAYAR) ===================== --}}
         <div class="card p-10 text-center">
             <p class="text-sm text-gray-400 mb-2">Nomor Antrian Pendaftaran Kamu</p>
-            <p class="text-6xl font-extrabold text-klinik-green mb-3">{{ $tiket->kode_antrian }}</p>
+            <p class="text-6xl font-extrabold text-klinik-blue-dark mb-3">{{ $tiket->kode_antrian }}</p>
             <p class="text-sm text-gray-500 mt-4">
                 Silakan duduk dan tunggu nomor kamu dipanggil oleh staf pendaftaran di layar antrian.
             </p>
@@ -40,7 +40,7 @@
                         wire:click="cetakUlang"
                         wire:loading.attr="disabled"
                         wire:target="cetakUlang"
-                        class="text-sm font-medium text-klinik-green border border-klinik-green px-6 py-3 rounded-full hover:bg-klinik-green/5 disabled:opacity-60"
+                        class="text-sm font-medium text-klinik-blue-dark border border-klinik-blue-dark px-6 py-3 rounded-full hover:bg-klinik-blue-dark/5 disabled:opacity-60"
                     >
                         <span wire:loading.remove wire:target="cetakUlang">Cetak Ulang ke Printer</span>
                         <span wire:loading wire:target="cetakUlang">Mencetak...</span>
@@ -49,12 +49,12 @@
 
                 <button
                     onclick="window.print()"
-                    class="text-sm font-medium text-klinik-green border border-klinik-green px-6 py-3 rounded-full hover:bg-klinik-green/5"
+                    class="text-sm font-medium text-klinik-blue-dark border border-klinik-blue-dark px-6 py-3 rounded-full hover:bg-klinik-blue-dark/5"
                 >
                     Cetak via Browser
                 </button>
 
-                <button wire:click="ulangi" class="text-sm font-medium text-white bg-klinik-green px-6 py-3 rounded-full hover:bg-klinik-green-dark">
+                <button wire:click="ulangi" class="text-sm font-medium text-white bg-klinik-blue-dark px-6 py-3 rounded-full hover:bg-blue-800">
                     Selesai
                 </button>
             </div>

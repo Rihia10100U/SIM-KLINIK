@@ -10,7 +10,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
 
         <div class="card p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark shrink-0">
                 <x-icon name="users" class="w-6 h-6" />
             </div>
             <div>
@@ -20,7 +20,7 @@
         </div>
 
         <div class="card p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark shrink-0">
                 <x-icon name="users" class="w-6 h-6" />
             </div>
             <div>
@@ -30,7 +30,7 @@
         </div>
 
         <div class="card p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-sky-500 shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-klinik-blue-dark shrink-0">
                 <x-icon name="wallet" class="w-6 h-6" />
             </div>
             <div>
@@ -49,7 +49,7 @@
         <div class="card p-5 lg:col-span-2 ring-2 ring-sky-100">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="font-semibold text-gray-800">Kunjungan Pasien - Minggu Ini</h3>
-                <span class="text-xs bg-sky-50 text-sky-500 px-3 py-1 rounded-full font-medium">
+                <span class="text-xs bg-sky-50 text-klinik-blue-dark px-3 py-1 rounded-full font-medium">
                     {{ now()->locale('id')->translatedFormat('M Y') }}
                 </span>
             </div>
@@ -61,7 +61,7 @@
                     <div class="flex flex-col items-center flex-1 h-full justify-end">
                         <span class="text-xs font-semibold text-gray-600 mb-1">{{ $item['jumlah'] }}</span>
                         <div
-                            class="w-8 sm:w-10 rounded-t-md transition-all {{ $item['jumlah'] === $max ? 'bg-sky-500' : 'bg-sky-100' }}"
+                            class="w-8 sm:w-10 rounded-t-md transition-all {{ $item['jumlah'] === $max ? 'bg-klinik-blue-dark' : 'bg-sky-100' }}"
                             style="height: {{ $item['jumlah'] / $max * 100 }}%"
                         ></div>
                         <span class="text-xs text-gray-400 mt-2">{{ $item['hari'] }}</span>
@@ -83,7 +83,7 @@
                 @foreach ($antrianAktif as $a)
                     <div class="flex items-center justify-between bg-gray-50 rounded-xl p-3">
                         <div class="flex items-center gap-3">
-                            <span class="text-sky-500 font-bold text-sm w-12">{{ $a['kode'] }}</span>
+                            <span class="text-klinik-blue-dark font-bold text-sm w-12">{{ $a['kode'] }}</span>
                             <div>
                                 <p class="text-sm font-medium text-gray-700">{{ $a['nama'] }}</p>
                                 <p class="text-xs text-gray-400">{{ $a['poli'] }}</p>

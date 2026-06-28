@@ -18,21 +18,21 @@
         <div>
             <label class="text-xs font-medium text-gray-500">Judul Video</label>
             <input type="text" wire:model="judul" placeholder="Mis: Video Profil Klinik"
-                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
             @error('judul') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div>
             <label class="text-xs font-medium text-gray-500">File Video (MP4, WebM, OGG, AVI — max 200MB)</label>
             <input type="file" wire:model="video" accept="video/mp4,video/webm,video/ogg,video/x-msvideo"
-                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-klinik-blue/10 file:text-klinik-blue hover:file:bg-klinik-blue/20">
+                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-klinik-blue-dark/10 file:text-klinik-blue-dark hover:file:bg-klinik-blue-dark/20">
             @error('video') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-            <div wire:loading wire:target="video" class="text-xs text-klinik-blue mt-2">Mengupload...</div>
+            <div wire:loading wire:target="video" class="text-xs text-klinik-blue-dark mt-2">Mengupload...</div>
         </div>
 
         <div class="flex justify-end">
             <button type="submit" wire:loading.attr="disabled" wire:target="simpan"
-                class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:opacity-90 disabled:opacity-60">
+                class="btn-primary">
                 <span wire:loading.remove wire:target="simpan">Upload Video</span>
                 <span wire:loading wire:target="simpan">Mengupload...</span>
             </button>
@@ -48,7 +48,7 @@
         @else
             <div class="space-y-4">
                 @foreach ($mediaList as $media)
-                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl {{ $media->aktif ? 'ring-2 ring-klinik-blue' : '' }}">
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl {{ $media->aktif ? 'ring-2 ring-klinik-blue-dark' : '' }}">
                         <div class="w-16 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 shrink-0 overflow-hidden">
                             <video class="w-full h-full object-cover" src="{{ $media->url() }}" muted preload="metadata"></video>
                         </div>
@@ -65,7 +65,7 @@
                                 </button>
                             @else
                                 <button wire:click="setAktif({{ $media->id }})"
-                                    class="text-xs font-medium text-klinik-blue hover:underline">
+                                    class="text-xs font-medium text-klinik-blue-dark hover:underline">
                                     Aktifkan
                                 </button>
                             @endif

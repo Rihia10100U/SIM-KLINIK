@@ -11,14 +11,14 @@
     {{-- ===================== HEADER ===================== --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">Manajemen Antrian</h2>
+            <h2 class="text-xl font-bold text-gray-800">Manajemen Antrian Poli</h2>
             <p class="text-sm text-gray-400 mt-1">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</p>
         </div>
 
         <div class="flex items-center gap-3">
             <select
                 wire:model.live="filterPoli"
-                class="w-64 pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-full transition-all duration-300 outline-none hover:border-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+                class="bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
             >
                 <option value="">Semua Poli</option>
                 @foreach ($polis as $poli)
@@ -28,7 +28,7 @@
 
             <button
                 wire:click="bukaForm"
-                class="flex items-center gap-2 bg-klinik-blue text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-klinik-blue-dark transition-colors whitespace-nowrap"
+                class="flex items-center gap-2 bg-klinik-blue-dark text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-blue-800 transition-colors whitespace-nowrap"
             >
                 <x-icon name="ticket" class="w-4 h-4" /> Daftarkan ke Antrian
             </button>
@@ -51,14 +51,14 @@
                 @forelse ($antrianMenunggu as $a)
                     <div class="bg-gray-50 rounded-xl p-3" wire:key="menunggu-{{ $a->id }}">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sky-500 font-bold text-sm">{{ $a->kode_antrian }}</span>
+                            <span class="text-klinik-blue-dark font-bold text-sm">{{ $a->kode_antrian }}</span>
                             <span class="text-[11px] text-gray-400">{{ $a->poli->nama }}</span>
                         </div>
                         <p class="text-sm font-medium text-gray-700 mb-3">{{ $a->pasien->nama }}</p>
                         <div class="flex items-center gap-2">
                             <button
                                 wire:click="panggil({{ $a->id }})"
-                                class="flex-1 text-xs font-medium text-white bg-sky-500 px-3 py-1.5 rounded-full hover:bg-sky-600"
+                                class="flex-1 text-xs font-medium text-white bg-klinik-blue-dark px-3 py-1.5 rounded-full hover:bg-blue-800"
                             >
                                 Panggil
                             </button>
@@ -81,16 +81,16 @@
         <div class="card p-4">
             <div class="flex items-center justify-between mb-4 px-1">
                 <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-sky-500"></span> Dipanggil
+                    <span class="w-2 h-2 rounded-full bg-klinik-blue-dark"></span> Dipanggil
                 </h3>
-                <span class="badge bg-sky-100 text-sky-600">{{ $antrianDipanggil->count() }}</span>
+                <span class="badge bg-sky-100 text-klinik-blue-dark">{{ $antrianDipanggil->count() }}</span>
             </div>
 
             <div class="space-y-3 max-h-[32rem] overflow-y-auto pr-1">
                 @forelse ($antrianDipanggil as $a)
                     <div class="bg-gray-50 rounded-xl p-3" wire:key="dipanggil-{{ $a->id }}">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sky-500 font-bold text-sm">{{ $a->kode_antrian }}</span>
+                            <span class="text-klinik-blue-dark font-bold text-sm">{{ $a->kode_antrian }}</span>
                             <span class="text-[11px] text-gray-400">{{ $a->poli->nama }}</span>
                         </div>
                         <p class="text-sm font-medium text-gray-700 mb-3">{{ $a->pasien->nama }}</p>
@@ -104,7 +104,7 @@
                             </button>
                             <button
                                 wire:click="panggilUlang({{ $a->id }})"
-                                class="text-xs font-medium text-sky-500 px-2 hover:underline whitespace-nowrap"
+                                class="text-xs font-medium text-klinik-blue-dark px-2 hover:underline whitespace-nowrap"
                             >
                                 Panggil Ulang
                             </button>
@@ -144,10 +144,10 @@
     {{-- ===================== MODAL DAFTARKAN ANTRIAN ===================== --}}
     @if ($showModal)
         <div
-            class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+            class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
             wire:click.self="tutupForm"
         >
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">Daftarkan ke Antrian</h3>
@@ -165,7 +165,7 @@
                             wire:model.live.debounce.300ms="cariPasien"
                             placeholder="Ketik nama atau No. RM..."
                             autocomplete="off"
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                         >
                         @error('pasien_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 
@@ -193,7 +193,7 @@
                         <label class="text-xs font-medium text-gray-500">Poli Tujuan</label>
                         <select
                             wire:model="poli_id"
-                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40"
+                            class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40"
                         >
                             <option value="">Pilih poli</option>
                             @foreach ($polis as $poli)
@@ -203,6 +203,27 @@
                             @endforeach
                         </select>
                         @error('poli_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- BPJS --}}
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1.5">Jenis Pasien</label>
+                        <div class="grid grid-cols-2 gap-2 bg-gray-100 rounded-full p-1">
+                            <button
+                                type="button"
+                                wire:click="$set('bpjs', false)"
+                                class="text-sm font-medium py-1.5 rounded-full transition-colors {{ !$bpjs ? 'bg-klinik-blue-dark text-white' : 'text-gray-500' }}"
+                            >
+                                Tidak BPJS
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="$set('bpjs', true)"
+                                class="text-sm font-medium py-1.5 rounded-full transition-colors {{ $bpjs ? 'bg-klinik-blue-dark text-white' : 'text-gray-500' }}"
+                            >
+                                Pasien BPJS
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex items-center justify-end gap-3 pt-2">
@@ -217,7 +238,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="daftarkan"
-                            class="text-sm font-medium text-white bg-klinik-blue px-5 py-2 rounded-full hover:bg-klinik-blue-dark disabled:opacity-60"
+                            class="text-sm font-medium text-white bg-klinik-blue-dark px-5 py-2 rounded-full hover:bg-blue-800 disabled:opacity-60"
                         >
                             <span wire:loading.remove wire:target="daftarkan">Daftarkan</span>
                             <span wire:loading wire:target="daftarkan">Menyimpan...</span>

@@ -22,13 +22,13 @@
     type="text"
     wire:model.live.debounce.400ms="cari"
     placeholder="Cari nama layanan..."
-    class="w-64 pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-full transition-all duration-300 outline-none hover:border-gray-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+    class="search-input"
 >
             </div>
 
             <button
                 wire:click="bukaForm"
-                class="flex items-center gap-2 bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-blue-600 transition-colors whitespace-nowrap"
+                class="btn-success"
             >
                 <x-icon name="tag" class="w-4 h-4" /> Tambah Layanan
             </button>
@@ -66,7 +66,7 @@
                             </td>
                             <td class="px-5 py-3">
                                 <div class="flex items-center justify-end gap-3">
-                                    <button wire:click="edit({{ $l->id }})" class="text-xs font-medium text-sky-500 hover:underline">
+                                    <button wire:click="edit({{ $l->id }})" class="text-xs font-medium text-klinik-blue-dark hover:underline">
                                         Edit
                                     </button>
                                     <button
@@ -103,8 +103,8 @@
 
     {{-- ===================== MODAL TAMBAH / EDIT ===================== --}}
     @if ($showModal)
-        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupForm">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+        <div class="modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" wire:click.self="tutupForm">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
 
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-gray-800">
@@ -118,14 +118,14 @@
                 <form wire:submit="simpan" class="space-y-4">
                     <div>
                         <label class="text-xs font-medium text-gray-500">Nama Layanan</label>
-                        <input type="text" wire:model="nama" placeholder="mis. Konsultasi Poli Umum" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                        <input type="text" wire:model="nama" placeholder="mis. Konsultasi Poli Umum" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                         @error('nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-medium text-gray-500">Kategori</label>
-                            <select wire:model="kategori" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <select wire:model="kategori" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                                 <option value="konsultasi">Konsultasi</option>
                                 <option value="tindakan">Tindakan</option>
                                 <option value="lainnya">Lainnya</option>
@@ -133,7 +133,7 @@
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-500">Poli Terkait</label>
-                            <select wire:model="poli_id" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                            <select wire:model="poli_id" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                                 <option value="">Tidak terikat poli</option>
                                 @foreach ($polis as $poli)
                                     <option value="{{ $poli->id }}">{{ $poli->nama }}</option>
@@ -144,7 +144,7 @@
 
                     <div>
                         <label class="text-xs font-medium text-gray-500">Harga (Rp)</label>
-                        <input type="number" min="0" wire:model="harga" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue/40">
+                        <input type="number" min="0" wire:model="harga" class="mt-1 w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-klinik-blue-dark/40">
                         @error('harga') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -160,14 +160,14 @@
                     @endif
 
                     <div class="flex items-center justify-end gap-3 pt-2">
-                        <button type="button" wire:click="tutupForm" class="text-sm font-medium text-gray-500 px-4 py-2 rounded-full hover:bg-gray-100">
+                        <button type="button" wire:click="tutupForm" class="btn-cancel">
                             Batal
                         </button>
                         <button
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="simpan"
-                            class="text-sm font-medium text-white bg-blue-500 px-5 py-2 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-60"
+                            class="btn-primary"
                         >
                             <span wire:loading.remove wire:target="simpan">Simpan</span>
                             <span wire:loading wire:target="simpan">Menyimpan...</span>
