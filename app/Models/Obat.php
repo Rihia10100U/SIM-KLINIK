@@ -32,4 +32,27 @@ class Obat extends Model
 
         return 'aman';
     }
+
+    public function kirimNotifikasiStok(): void
+    {
+        $status = $this->statusStok();
+        if ($status === 'aman') {
+            return;
+        }
+
+        $label = $status === 'habis' ? 'Stok Habis' : 'Stok Menipis';
+        $message = $status === 'habis'
+            ? "Stok {$this->nama} sudah habis."
+            : "Stok {$this->nama} menipis (sisa {$this->stok} {$this->satuan}).";
+
+        foreach (User::whereIn('role', ['admin', 'apoteker'])->cursor() as $user) {
+            Notification::send(
+                $user->id,
+                $label,
+                $message,
+                $status === 'habis' ? 'danger' : 'warning',
+                route('farmasi'),
+            );
+        }
+    }
 }

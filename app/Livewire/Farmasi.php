@@ -103,7 +103,9 @@ class Farmasi extends Component
         $data = $this->validate();
 
         if ($this->editId) {
-            Obat::findOrFail($this->editId)->update($data);
+            $obat = Obat::findOrFail($this->editId);
+            $obat->update($data);
+            $obat->kirimNotifikasiStok();
             session()->flash('sukses', 'Data obat berhasil diperbarui.');
         } else {
             $data['kode_obat'] = $this->generateKodeObat();
@@ -175,10 +177,13 @@ class Farmasi extends Component
 
         if ($this->jenisPerubahan === 'tambah') {
             $obat->increment('stok', $this->jumlahPerubahan);
+            $obat->refresh();
         } else {
             $obat->stok = max(0, $obat->stok - $this->jumlahPerubahan);
             $obat->save();
         }
+
+        $obat->kirimNotifikasiStok();
 
         session()->flash('sukses', 'Stok '.$obat->nama.' berhasil diperbarui.');
         $this->tutupStokForm();

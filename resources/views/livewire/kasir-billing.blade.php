@@ -31,7 +31,7 @@
                     </div>
                     <button
                         wire:click="bukaForm({{ $t->id }})"
-                        class="text-xs font-medium text-white bg-klinik-green px-4 py-1.5 rounded-full hover:bg-klinik-green-dark"
+                        class="text-xs font-medium text-white bg-klinik-blue-dark px-4 py-1.5 rounded-full hover:bg-blue-800 transition-colors whitespace-nowrap"
                     >
                         Proses Pembayaran
                     </button>
@@ -250,7 +250,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="konfirmasiPembayaran"
-                            class="text-sm font-medium text-white bg-klinik-green px-5 py-2 rounded-full hover:bg-klinik-green-dark disabled:opacity-60"
+                            class="text-sm font-medium text-white bg-klinik-blue-dark px-5 py-2 rounded-full hover:bg-blue-800 transition-colors whitespace-nowrap"
                         >
                             <span wire:loading.remove wire:target="konfirmasiPembayaran">Konfirmasi & Bayar</span>
                             <span wire:loading wire:target="konfirmasiPembayaran">Memproses...</span>

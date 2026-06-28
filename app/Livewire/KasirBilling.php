@@ -140,7 +140,9 @@ class KasirBilling extends Component
         $data = $this->validate();
         $total = $this->total();
 
-        DB::transaction(function () use ($data, $total) {
+        $transaksi = null;
+
+        DB::transaction(function () use ($data, $total, &$transaksi) {
             $transaksi = Transaksi::findOrFail($this->transaksiId);
 
             $metode = $this->bpjs ? 'BPJS' : $data['metode'];
@@ -179,6 +181,7 @@ class KasirBilling extends Component
                     if ($obat) {
                         $obat->stok = max(0, $obat->stok - $qty);
                         $obat->save();
+                        $obat->kirimNotifikasiStok();
                     }
                 }
             }
